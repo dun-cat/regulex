@@ -17,7 +17,7 @@ export type Maybe<T> = T | undefined;
 export type Writable<T> = {-readonly [P in keyof T]-?: T[P]};
 
 /** Union to Intersection */
-export type InterU<U> = (U extends any ? (a: U) => 0 : never) extends ((a: infer I) => 0) ? I : never;
+export type InterU<U> = (U extends any ? (a: U) => 0 : never) extends (a: infer I) => 0 ? I : never;
 
 export type ArrayIndex<T> = Exclude<keyof T, Extract<keyof any[], string>>;
 
@@ -28,8 +28,12 @@ Substitude Type A to B in Type Expr E recursively.
 @param InferInter  Whether infer intersection type, only works when A is TypeVar.
 */
 export type Subst<E, A, B, InferInter = false> = InferInter extends true
-  ? (E extends A & infer X ? B & (X extends A ? unknown : X) : SubstIn<E, A, B, true>)
-  : (E extends A ? B : SubstIn<E, A, B, false>);
+  ? E extends A & infer X
+    ? B & (X extends A ? unknown : X)
+    : SubstIn<E, A, B, true>
+  : E extends A
+  ? B
+  : SubstIn<E, A, B, false>;
 
 /**
 SubstIn is same as Subst except it wont replace top E.

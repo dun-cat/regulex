@@ -1,18 +1,22 @@
 {
   "compilerOptions": {
+    // "skipLibCheck": true,
     "outDir": "build",
     "target": "ES6",
     "module": "commonjs",
     "sourceMap": true,
     "strict": true,
-    "downlevelIteration":true,
+    "downlevelIteration": true,
     "noErrorTruncation": true,
-    "esModuleInterop":false,
+    "esModuleInterop": true,
     "newLine": "LF",
-    "lib":["dom"]
+    "lib": [
+      "dom"
+    ]
   },
   "include": [
-    "src/**/*","test/**/*"
+    "src/**/*",
+    "test/**/*"
   ],
   "exclude": [
     "node_modules"

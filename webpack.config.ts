@@ -1,14 +1,13 @@
-import path = require('path');
-import webpack = require('webpack');
-import HtmlWebpackPlugin = require('html-webpack-plugin');
-import MiniCssExtractPlugin = require('mini-css-extract-plugin');
-import fs = require('fs');
+import path from 'path';
+import webpack from 'webpack';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import fs from 'fs';
 
 const WebpackShellPlugin = require('webpack-shell-plugin');
 const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
-import {loader} from 'webpack';
 
 const _DEV_ = (process.env.NODE_ENV || '').toLowerCase().startsWith('dev');
 
@@ -34,7 +33,7 @@ const plugins = [
         for (let f of files) {
           try {
             fs.unlinkSync(f);
-          } catch (e) {}
+          } catch (e) { }
         }
       });
     }
@@ -80,14 +79,14 @@ if (!_DEV_) {
       assetNameRegExp: /\.css$/g,
       cssProcessor: require('cssnano'),
       cssProcessorPluginOptions: {
-        preset: ['default', {discardComments: {removeAll: true}}]
+        preset: ['default', { discardComments: { removeAll: true } }]
       },
       canPrint: true
     })
   );
 }
 
-const config: webpack.Configuration = {
+const config = {
   mode: _DEV_ ? 'development' : 'production',
   entry: path.join(WEB_SRC_PATH, 'main.ts'),
   output: {
@@ -121,7 +120,7 @@ const config: webpack.Configuration = {
     hot: false,
     inline: false,
     liveReload: false
-  } as any,
+  },
   plugins
 };
 

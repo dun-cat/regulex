@@ -114,7 +114,7 @@ export abstract class BaseGen {
     let gen = flags.unicode ? FC.oneof<T>(UtilGen.BaseCharClass, UtilGen.UnicodeCharClass) : UtilGen.BaseCharClass;
 
     return gen
-      .map(t => {
+      .map((t: T) => {
         return {
           source: '\\' + t.source,
           expect: {type: 'CharClassEscape' as const, charClass: t.expect}

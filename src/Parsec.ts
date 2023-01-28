@@ -59,43 +59,37 @@ export abstract class Parser<S extends K.Stream<S>, A, State, UserError> {
   (Why that? Because we don't have *REAL* immutable data type.)
   */
   map<B>(f: (v: A, ctx: TokenCtx<S, State>) => B): Parser<S, B, State, UserError> {
-    return MapF.compose(
-      this,
-      (r, ctx) => {
-        if (isResultOK(r)) {
-          return {value: f(r.value, ctx)};
-        } else {
-          return r;
-        }
+    return MapF.compose(this, (r, ctx) => {
+      if (isResultOK(r)) {
+        return {value: f(r.value, ctx)};
+      } else {
+        return r;
       }
-    );
+    });
   }
 
   /**
   Map result function return with UserError
   */
   mapE<B>(f: (v: A, ctx: TokenCtx<S, State>) => Result<B, UserError>): Parser<S, B, State, UserError> {
-    let p: Parser<S, B, State, UserError> = MapF.compose(
-      this,
-      (r, ctx) => {
-        if (isResultOK(r)) {
-          let r2 = f(r.value, ctx);
-          if (isResultOK(r2)) {
-            return r2;
-          } else {
-            return {
-              error: {
-                position: ctx.range[0],
-                parser: p,
-                userError: r2.error
-              }
-            };
-          }
+    let p: Parser<S, B, State, UserError> = MapF.compose(this, (r, ctx) => {
+      if (isResultOK(r)) {
+        let r2 = f(r.value, ctx);
+        if (isResultOK(r2)) {
+          return r2;
         } else {
-          return r;
+          return {
+            error: {
+              position: ctx.range[0],
+              parser: p,
+              userError: r2.error
+            }
+          };
         }
+      } else {
+        return r;
       }
-    );
+    });
 
     return p;
   }
@@ -103,26 +97,20 @@ export abstract class Parser<S extends K.Stream<S>, A, State, UserError> {
   mapF<B>(
     f: (a: SimpleResult<A, UserError>, ctx: TokenCtx<S, State>) => SimpleResult<B, UserError>
   ): Parser<S, B, State, UserError> {
-    return MapF.compose(
-      this,
-      f
-    );
+    return MapF.compose(this, f);
   }
 
   /**
   Map result UserError
   */
   mapError(f: (err: UserError) => UserError): Parser<S, A, State, UserError> {
-    return MapF.compose(
-      this,
-      r => {
-        if (isResultOK(r)) return r;
-        if (r.error.userError) {
-          r.error.userError = f(r.error.userError);
-        }
-        return r;
+    return MapF.compose(this, r => {
+      if (isResultOK(r)) return r;
+      if (r.error.userError) {
+        r.error.userError = f(r.error.userError);
       }
-    );
+      return r;
+    });
   }
 
   /**
@@ -323,10 +311,7 @@ class MapF<S extends K.Stream<S>, A, B, State, UserError> extends Parser<S, B, S
   }
 
   thenL(next: Parser<S, any, State, UserError>): Parser<S, B, State, UserError> {
-    return MapF.compose(
-      this._p.thenL(next),
-      this._f
-    );
+    return MapF.compose(this._p.thenL(next), this._f);
   }
 
   _checkNullable(): boolean {
@@ -992,7 +977,7 @@ export type ParserDef<S extends K.Stream<S>, A, State, UserError> =
   | Parser<S, A, State, UserError>
   | RecurParserDef<S, A, State, UserError>;
 
-export type ParserUndef<F> = F extends (() => infer P) ? P : F extends Parser<any, any, any, any> ? F : never;
+export type ParserUndef<F> = F extends () => infer P ? P : F extends Parser<any, any, any, any> ? F : never;
 
 export type FilterParserField<T> = {
   [K in keyof T]: T[K] extends Function | Parser<any, any, any, any> ? K : never;

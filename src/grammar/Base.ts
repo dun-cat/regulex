@@ -146,7 +146,7 @@ export const IDRegex = new RegExp(
 );
 
 export function asNode<T extends AST.NodeBase>(type?: T['type']) {
-  return function(v: Omit<T, 'range' | 'type'>, ctx: {range: TokenRange}): T {
+  return function(v: Omit<T, 'range' | 'type'> | {}, ctx: {range: TokenRange}): T {
     let a = v as any;
     if (!a.type && type) {
       a.type = type;
@@ -609,18 +609,15 @@ export function toSource(node: AST.Node): string {
 
     function fixStickyDecimalEscape(a: string[]): string {
       return a
-        .reduce(
-          (prev, cur) => {
-            let end = prev[prev.length - 1];
-            if (end && /\\\d*$/.test(end) && /^\d/.test(cur)) {
-              prev.push(K.Char.hexEscape(cur[0]), cur.slice(1));
-            } else {
-              prev.push(cur);
-            }
-            return prev;
-          },
-          [] as string[]
-        )
+        .reduce((prev, cur) => {
+          let end = prev[prev.length - 1];
+          if (end && /\\\d*$/.test(end) && /^\d/.test(cur)) {
+            prev.push(K.Char.hexEscape(cur[0]), cur.slice(1));
+          } else {
+            prev.push(cur);
+          }
+          return prev;
+        }, [] as string[])
         .join('');
     }
 

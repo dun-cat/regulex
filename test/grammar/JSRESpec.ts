@@ -58,6 +58,10 @@ describe('Grammar.JSRE', function() {
 
   for (let ty of testTypes) {
     let gen = (baseGen[ty] as GenFn<AST.NodeOfType<typeof ty>>)(initState);
-    runGrammarTest(ty, JSRE.parse, gen.map(testCase => ({flags, testCase})));
+    runGrammarTest(
+      ty,
+      JSRE.parse,
+      gen.map(testCase => ({flags, testCase}))
+    );
   }
 });

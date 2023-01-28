@@ -264,7 +264,7 @@ export type Visitor<N extends INode = Node> =
   | (UT.DeepPartial<FullVisitor<N>> & {defaults: VisitorCase<N, N['type']>});
 
 export type FullMatchClause<A, B, N extends INode = Node> = {
-  [K in N['type']]: ((node: A extends N ? PickByNodeType<N, K> : SubstIn<PickByNodeType<N, K>, N, A>) => B);
+  [K in N['type']]: (node: A extends N ? PickByNodeType<N, K> : SubstIn<PickByNodeType<N, K>, N, A>) => B;
 };
 
 export type MatchClause<A, B, N extends INode = Node> =
@@ -316,7 +316,10 @@ Bottom up transform node, aka Catamorphism.
 */
 export function bottomUp<T, N extends Node = Node>(n: N, f: (n: NodeF<T, N>, parent?: N) => T): T {
   function cata(n: N, parent?: N): T {
-    return f(fmap<T, N>(n, a => cata(a, n)), parent);
+    return f(
+      fmap<T, N>(n, a => cata(a, n)),
+      parent
+    );
   }
   return cata(n);
 }
