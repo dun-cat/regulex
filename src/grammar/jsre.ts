@@ -12,7 +12,7 @@ import {
   check,
   RegexParseResult,
   groupAssertionTypeMap
-} from './_base';
+} from './base';
 
 const P = refine<string, RegexParseState, RegexError>();
 
