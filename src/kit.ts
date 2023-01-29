@@ -14,7 +14,7 @@ export const enum Ordering {
 
 export type Maybe<T> = T | undefined;
 
-export type Writable<T> = {-readonly [P in keyof T]-?: T[P]};
+export type Writable<T> = { -readonly [P in keyof T]-?: T[P] };
 
 /** Union to Intersection */
 export type InterU<U> = (U extends any ? (a: U) => 0 : never) extends (a: infer I) => 0 ? I : never;
@@ -29,8 +29,8 @@ Substitude Type A to B in Type Expr E recursively.
 */
 export type Subst<E, A, B, InferInter = false> = InferInter extends true
   ? E extends A & infer X
-    ? B & (X extends A ? unknown : X)
-    : SubstIn<E, A, B, true>
+  ? B & (X extends A ? unknown : X)
+  : SubstIn<E, A, B, true>
   : E extends A
   ? B
   : SubstIn<E, A, B, false>;
@@ -58,7 +58,7 @@ export type SubstInRaw<E, A, B, InferInter> = E extends (...a: infer Params) => 
   ? SubstROArray<X, A, B, InferInter>
   : SubstRecord<E, A, B, InferInter>;
 
-export type SubstRecord<E, A, B, InferInter> = {[K in keyof E]: Subst<E[K], A, B, InferInter>};
+export type SubstRecord<E, A, B, InferInter> = { [K in keyof E]: Subst<E[K], A, B, InferInter> };
 /*
 // This definition will cause error "Type instantiation is excessively deep and possibly infinite"
 // Use interface extends to defer the type instantiation
@@ -67,8 +67,8 @@ export type SubstArray<E, A, B, InferInter> = E extends Array<any>
   ? Array<{[I in keyof E]: Subst<E[I], A, B, InferInter>}[Exclude<keyof E, string>]>
   : ReadonlyArray<{[I in keyof E]: Subst<E[I], A, B, InferInter>}[Exclude<keyof E, string>]>;
 */
-export interface SubstArray<X, A, B, InferInter> extends Array<Subst<X, A, B, InferInter>> {}
-export interface SubstROArray<X, A, B, InferInter> extends ReadonlyArray<Subst<X, A, B, InferInter>> {}
+export interface SubstArray<X, A, B, InferInter> extends Array<Subst<X, A, B, InferInter>> { }
+export interface SubstROArray<X, A, B, InferInter> extends ReadonlyArray<Subst<X, A, B, InferInter>> { }
 
 export interface $<S extends string> {
   _TypeVar_: S;
@@ -113,10 +113,10 @@ export type FSubstInRaw<E, A, F> = E extends (...a: infer Params) => infer Ret
   ? FSubstArray<E, A, F>
   : FSubstRecord<E, A, F>;
 
-export type FSubstRecord<E, A, F> = {[K in keyof E]: FSubst<E[K], A, F>};
+export type FSubstRecord<E, A, F> = { [K in keyof E]: FSubst<E[K], A, F> };
 export type FSubstArray<E, A, F> = E extends Array<any>
-  ? Array<{[I in keyof E]: FSubst<E[I], A, F>}[Exclude<keyof E, string>]>
-  : ReadonlyArray<{[I in keyof E]: FSubst<E[I], A, F>}[Exclude<keyof E, string>]>;
+  ? Array<{ [I in keyof E]: FSubst<E[I], A, F> }[Exclude<keyof E, string>]>
+  : ReadonlyArray<{ [I in keyof E]: FSubst<E[I], A, F> }[Exclude<keyof E, string>]>;
 
 /**
 Data.Fix
@@ -128,24 +128,24 @@ Data.Fix
   type C = {kind:'C',items:T1[]};
   type T2 = Fix<T1 | C>;
 */
-export type Fix<T> = {unfix: SubstIn<T, T, Fix<T>>};
+export type Fix<T> = { unfix: SubstIn<T, T, Fix<T>> };
 
 /**
 Transform (A => B | A => C) to (A => B|C)
 */
 export type UnionF<F> = [F] extends [Function]
   ? [F] extends [(...a: infer A) => infer B]
-    ? (...a: A) => B
-    : never
+  ? (...a: A) => B
+  : never
   : F;
 
 /** Index Signature */
-export function IndexSig<T>(a: T): {[k: string]: UnionF<T[keyof T]>} {
+export function IndexSig<T>(a: T): { [k: string]: UnionF<T[keyof T]> } {
   return a as any;
 }
 
-export type OK<T> = {value: T};
-export type Err<E> = {error: E};
+export type OK<T> = { value: T };
+export type Err<E> = { error: E };
 
 export type Result<T, E> = OK<T> | Err<E>;
 
@@ -154,11 +154,11 @@ export function isResultOK<A>(a: Result<A, any>): a is OK<A> {
 }
 
 export function Err<E>(a: E): undefined extends E ? never : Err<E> {
-  return <any>{error: a};
+  return <any>{ error: a };
 }
 
 export function OK<T>(a: T): OK<T> {
-  return {value: a};
+  return { value: a };
 }
 
 export interface Eq<A> {
@@ -172,7 +172,7 @@ export interface Comparator<A> {
 /**
 Usage: function f<S extends Stream<S>>(s:S):S {return s.slice()}
 */
-export interface Stream<S extends {readonly [index: number]: S[number]}> {
+export interface Stream<S extends { readonly [index: number]: S[number] }> {
   readonly [index: number]: S[number];
   length: number;
   slice(): S;
@@ -237,7 +237,7 @@ export function compareFullUnicode(s1: string, s2: string): Ordering {
   return compareArray(a1, a2);
 }
 
-export type BSearchResult = {found: boolean; index: number};
+export type BSearchResult = { found: boolean; index: number };
 /** Binary Search
 All items greater than `x` are behind BSearchResult.index
 When `x` lesser than all elements, result index will be startIndex-1.
@@ -259,9 +259,9 @@ export function bsearch<T>(
   startIndex: number = 0,
   endIndex: number = a.length - 1
 ): BSearchResult {
-  let result = {found: false, index: -1};
+  let result = { found: false, index: -1 };
   let i = startIndex - 1;
-  for (let lo = startIndex, hi = endIndex; lo <= hi; ) {
+  for (let lo = startIndex, hi = endIndex; lo <= hi;) {
     i = lo + ((hi - lo + 1) >> 1);
     let middle = a[i];
     let ord = cmp(x, middle);
@@ -371,7 +371,7 @@ export function guidOf(obj: any): string {
   } else {
     let _guid = guid();
     // Prohibit from enumerating
-    Object.defineProperty(obj, '_GUID_', {value: _guid});
+    Object.defineProperty(obj, '_GUID_', { value: _guid });
     return _guid;
   }
 }
@@ -401,6 +401,21 @@ export function escapeUnicodes(s: string, codePointSyntax: boolean = true): stri
       }
     })
     .join('');
+}
+const printEscapeMap = {
+  "\n": "\\n", "\t": "\\t", "\f": "\\f",
+  "\r": "\\r", " ": " ", "\\": "\\\\", "\0": "\\0"
+} as { [key: string] };
+// Convert string to printable,replace all control chars and unicode to hex escape
+export function toPrint(s: string, isRaw?: boolean) {
+  var ctrl = /[\x00-\x1F\x7F-\x9F]/, unicode = /[\u009F-\uFFFF]/;
+  s = s.split('').map(function (c) {
+    if (!isRaw && printEscapeMap.hasOwnProperty(c)) return printEscapeMap[c];
+    else if (unicode.test(c)) return '\\u' + ('00' + ord(c).toString(16).toUpperCase()).slice(-4);
+    else if (ctrl.test(c)) return '\\x' + ("0" + ord(c).toString(16).toUpperCase()).slice(-2);
+    return c;
+  }).join('');
+  return s;
 }
 
 export function escapeNonAlphanum(s: string, codePointSyntax: boolean = true): string {
@@ -455,15 +470,15 @@ export function invertMap<K, V>(m: Map<K, V>): Map<V, K> {
   return new Map(Array.from(m).map(kv => kv.reverse() as [V, K]));
 }
 
-type _InvertRecord<M> = InterU<{[K in keyof M]: {[V in M[K] extends keyof any ? M[K] : string]: K}}[keyof M]>;
+type _InvertRecord<M> = InterU<{ [K in keyof M]: { [V in M[K] extends keyof any ? M[K] : string]: K } }[keyof M]>;
 
 export type InvertRecord<M> =
   // Ensure values of M are distinct types.
   // Overlaps will result in intersection type instead of union
   // which surely not super type of keyof M
   keyof M extends _InvertRecord<M>[keyof _InvertRecord<M>]
-    ? _InvertRecord<M>
-    : {[k in M[keyof M] extends keyof any ? M[keyof M] : string]: string};
+  ? _InvertRecord<M>
+  : { [k in M[keyof M] extends keyof any ? M[keyof M] : string]: string };
 
 export function invertRecord<M>(m: M): InvertRecord<M>;
 export function invertRecord(m: any): any {
@@ -506,7 +521,7 @@ Range "A" to "Z" => `0x41 * Math.pow(2,21) + 0x5A === 0x820005A`
 @todo:  Use another bit to repr char range with even gap.
 "\x10\x12\x14\x16\x18" could be repr as range 0x10 to 0x18 but with even gap.
 */
-export type CharRangeRepr = number & {_nominal_: true};
+export type CharRangeRepr = number & { _nominal_: true };
 
 export namespace CharRange {
   /** Pack char range two chars to CharRangeRepr */
@@ -737,9 +752,9 @@ export class Charset {
             // z-a  is invalid
             throw new RangeError(
               'Charset range out of order: ' +
-                escapeNonAlphanum(String.fromCodePoint(rangeBegin, _hyphenCodePoint, rangeEnd)) +
-                ' !\n' +
-                escapeNonAlphanum(re)
+              escapeNonAlphanum(String.fromCodePoint(rangeBegin, _hyphenCodePoint, rangeEnd)) +
+              ' !\n' +
+              escapeNonAlphanum(re)
             );
           }
           ranges.push(CharRange.pack(rangeBegin, rangeEnd));
@@ -785,14 +800,14 @@ export class Charset {
   }
 
   includeCodePoint(cp: number): boolean {
-    let {found} = bsearch<CharRangeRepr, number>(this.ranges, cp, (cp, range) => {
+    let { found } = bsearch<CharRangeRepr, number>(this.ranges, cp, (cp, range) => {
       return CharRange.compareCodePointToRange(cp, range);
     });
     return found;
   }
 
   includeRange(range: CharRangeRepr): boolean {
-    let {found} = bsearch(this.ranges, range, (range, x) => {
+    let { found } = bsearch(this.ranges, range, (range, x) => {
       if (CharRange.isSubsetOf(range, x)) return Ordering.EQ;
       return CharRange.compare(range, x);
     });
@@ -886,7 +901,7 @@ export class Charset {
     let otherRanges = other.ranges.slice();
     let thisRanges = this.ranges;
     let newRanges: CharRangeRepr[] = [];
-    for (let i = 0, j = 0; i < thisRanges.length && j < otherRanges.length; ) {
+    for (let i = 0, j = 0; i < thisRanges.length && j < otherRanges.length;) {
       let r1 = thisRanges[i];
       let r2 = otherRanges[j];
 
@@ -902,51 +917,51 @@ export class Charset {
         if (end1 <= end2) i++;
         if (end2 <= end1) j++;
       }
-    }
 
-    if (!newRanges.length) return Charset.empty;
 
-    return new Charset(newRanges);
-  }
+      !newRanges.length) return Charset.empty;
+          
+        turn new Charset(newRanges);
 
-  equals(other: Charset): boolean {
-    if (this.ranges.length !== other.ranges.length) return false;
-    return compareArray(this.ranges, other.ranges, CharRange.compare) === Ordering.EQ;
-  }
 
-  toPattern(): string {
-    return this.ranges.map(CharRange.toPattern).join('');
-  }
+      (other: Charset): boolean {
+        this.ranges.length !== other.ranges.length) return false;
+          rn compareArray(this.ranges, other.ranges, CharRange.compare) === Ordering.EQ;
 
-  toString(): string {
-    return escapeNonAlphanum(this.toPattern());
-  }
 
-  toRegex(): RegExp {
-    return new RegExp('[' + this.toPattern().replace(/[\[\]]/g, '\\$&') + ']', 'u');
-  }
+        toPattern(): string {
+          return this.ranges.map(CharRange.toPattern).join('');
+        }
 
-  toCodePoints(maxCount = Infinity): number[] {
-    let a = [];
-    for (let r of this.ranges) {
-      let b = CharRange.toCodePoints(r, maxCount);
-      maxCount -= b.length;
-      a.push(b);
-    }
+        toString(): string {
+          return escapeNonAlphanum(this.toPattern());
+        }
 
-    return flat(a);
-  }
+        Regex(): RegExp {
+          return new RegExp('[' + this.toPattern().replace(/[\[\]]/g, '\\$&') + ']', 'u');
+        }
 
-  [_inspect_](): string {
-    return this.toString();
-  }
+        CodePoints(maxCount = Infinity): number[] {
+          let a = [];
+          for (let r of this.ranges) {
+            let b = CharRange.toCodePoints(r, maxCount);
+            maxCount -= b.length;
+            a.push(b);
+          }
 
-  static compare(a: Charset, b: Charset): Ordering {
-    if (a === b) return Ordering.EQ;
-    return compareArray(a.ranges, b.ranges, CharRange.compare);
-  }
+          return flat(a);
+        }
 
-  static union(a: Charset[]): Charset {
+        [_inspect_](): string {
+          return this.toString();
+      
+        
+        ic compare(a: Charset, b: Charset): Ordering {
+            (a === b) return Ordering.EQ;
+            return compareArray(a.ranges, b.ranges, CharRange.compare);
+          }
+      
+    static union(a: Charset[]): Charset {
     return a.reduce((prev, current) => prev.union(current), Charset.empty);
   }
-}
+

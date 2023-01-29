@@ -78,6 +78,9 @@ const config = {
     publicPath: '/',
     filename: 'main.js',
   },
+  externals: {
+    raphael: "raphael"
+  },
   devtool: _DEV_ ? 'inline-source-map' : false,
   module: {
     rules: [

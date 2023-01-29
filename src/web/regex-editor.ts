@@ -96,7 +96,6 @@ export class RegexEditor extends EventEmitter<RegexEditorEvents> {
 
   public getRegex(): K.Result<AST.Regex, RegexValidateError> {
     let { source, flags } = this.getRawText();
-    console.log("flags", flags)
     let flagsResult = AST.RegexFlags.parse(flags, true);
     if (!K.isResultOK(flagsResult)) {
       return K.Err({ type: 'Flags', invalid: flagsResult.error });

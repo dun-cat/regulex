@@ -5,8 +5,8 @@ import { Charset, CharRange, Maybe, flat, bsearch } from '../kit';
 export const DEFAULT_UNICODE_PKG = 'unicode-12.0.0';
 
 if (require.main === module) {
-  console.log('Build: src/Unicode.ts');
-  buildUnicode(fs.realpathSync(__dirname) + '/../Unicode.ts');
+  console.log('Build: src/unicode.ts');
+  buildUnicode(fs.realpathSync(__dirname) + '/../unicode.ts');
 }
 
 export function buildUnicode(outputFile: string, unicodePkg = DEFAULT_UNICODE_PKG) {
