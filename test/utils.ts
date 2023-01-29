@@ -1,6 +1,6 @@
 import * as C from 'fast-check';
 import * as K from '../src/Kit';
-import {AssertionError} from 'assert';
+import { AssertionError } from 'assert';
 import * as PropertyGeneric from 'fast-check/lib/check/property/Property.generic';
 
 export function prettyPrint(a: any, indent = 2): string {
@@ -48,12 +48,12 @@ function errorAsKey(err: Error): string {
 }
 
 const PG = PropertyGeneric as any;
-PG.Property.prototype.run = function(this: any, v: any): any {
+PG.Property.prototype.run = function (this: any, v: any): any {
   this.beforeEachHook();
   try {
     const output = this.predicate(v);
     return output == null || output === true ? null : 'Property failed by returning false';
-  } catch (err) {
+  } catch (err: any) {
     // handleResult: https://github.com/dubzzz/fast-check/blob/469f52cb6236e658c5d4a3cac4545972227486a8/src/check/runner/RunnerIterator.ts#L38
     // precondition failure considered as success for the first version
     // if (PreconditionFailure.isFailure(err)) return err;
@@ -105,13 +105,11 @@ function _throwIfFailed<T>(out: C.RunDetails<T>) {
     } else {
       let originalError = FastCheckGlobalErrorMap.get(out.error as any)!;
       e = new AssertionError({
-        message: `Property failed after ${out.numRuns} tests\n{ seed: ${out.seed}, path: "${
-          out.counterexamplePath
-        }" }\nShrunk ${out.numShrinks} time(s). Got error: ${originalError}\n${
-          out.failures.length === 0
+        message: `Property failed after ${out.numRuns} tests\n{ seed: ${out.seed}, path: "${out.counterexamplePath
+          }" }\nShrunk ${out.numShrinks} time(s). Got error: ${originalError}\n${out.failures.length === 0
             ? 'Hint: Enable verbose mode in order to have the list of all failing values encountered during the run'
             : `Encountered failures were:\n- ${out.failures.map(a => prettyPrint(a)).join('\n- ')}`
-        }`,
+          }`,
         expected: originalError.expected,
         actual: originalError.actual
       });

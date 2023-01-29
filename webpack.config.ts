@@ -4,9 +4,10 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import fs from 'fs';
 
-const WebpackShellPlugin = require('webpack-shell-plugin');
-const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const WebpackShellPlugin = require('webpack-shell-plugin-next');
+// const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
+// const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 
 const _DEV_ = (process.env.NODE_ENV || '').toLowerCase().startsWith('dev');
@@ -20,7 +21,7 @@ const plugins = [
     inlineSource: '.(js|css)$',
     filename: 'beta.html'
   }),
-  new HtmlWebpackInlineSourcePlugin(),
+  // new HtmlWebpackInlineSourcePlugin(),
 
   // Generate TypeScript types for css modules
   new WebpackShellPlugin({
@@ -39,7 +40,7 @@ const plugins = [
     }
   },
 
-  new webpack.WatchIgnorePlugin([/css\.d\.ts$/]),
+  new webpack.WatchIgnorePlugin({ paths: [/css\.d\.ts$/] }),
 
   new MiniCssExtractPlugin({
     filename: 'main.css'
@@ -54,7 +55,7 @@ function cssModules(regex: RegExp, mode: 'local' | 'global'): webpack.RuleSetRul
       {
         loader: MiniCssExtractPlugin.loader,
         options: {
-          hmr: false
+          // hmr: false
         }
       },
       {
@@ -62,28 +63,15 @@ function cssModules(regex: RegExp, mode: 'local' | 'global'): webpack.RuleSetRul
         options: {
           modules: {
             mode: mode,
-            context: WEB_SRC_PATH,
-            localIdentName: '[local]-[hash:4]'
+            localIdentContext: WEB_SRC_PATH,
+            localIdentName: '[local]-[hash:4]',
+            exportLocalsConvention: "camelCase",
           },
-          localsConvention: 'camelCaseOnly',
           sourceMap: _DEV_
         }
       }
     ]
   };
-}
-
-if (!_DEV_) {
-  plugins.push(
-    new OptimizeCssAssetsPlugin({
-      assetNameRegExp: /\.css$/g,
-      cssProcessor: require('cssnano'),
-      cssProcessorPluginOptions: {
-        preset: ['default', { discardComments: { removeAll: true } }]
-      },
-      canPrint: true
-    })
-  );
 }
 
 const config = {
@@ -114,12 +102,15 @@ const config = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js']
   },
+  optimization: {
+    minimizer: [
+      // For webpack@5 you can use the `...` syntax to extend existing minimizers (i.e. `terser-webpack-plugin`), uncomment the next line
+      // `...`,
+      new CssMinimizerPlugin(),
+    ],
+  },
   devServer: {
-    contentBase: WEB_OUTPUT_PATH,
-    compress: false,
-    hot: false,
-    inline: false,
-    liveReload: false
+    static: WEB_OUTPUT_PATH,
   },
   plugins
 };
