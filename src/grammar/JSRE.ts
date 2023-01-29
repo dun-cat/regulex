@@ -1,6 +1,6 @@
-import {refine, Grammar, TokenRange} from '../Parsec';
-import * as K from '../Kit';
-import * as AST from '../AST';
+import { refine, Grammar, TokenRange } from '../_parsec';
+import * as K from '../_kit';
+import * as AST from '../ast';
 import {
   RegexParseState,
   RegexError,
@@ -12,7 +12,7 @@ import {
   check,
   RegexParseResult,
   groupAssertionTypeMap
-} from './Base';
+} from './_base';
 
 const P = refine<string, RegexParseState, RegexError>();
 
@@ -28,13 +28,13 @@ export class JSREGrammar extends BaseGrammar {
         .and(this.Quantifier.opt())
         .mapE((a, ctx) => {
           if (a[1]) {
-            return {error: {type: 'NothingToRepeat', range: ctx.range}} as K.Err<RegexError>;
+            return { error: { type: 'NothingToRepeat', range: ctx.range } } as K.Err<RegexError>;
           }
-          return {value: a[0]};
+          return { value: a[0] };
         }),
       this.Repeat(),
       this.Quantifier.mapE((a, ctx) => {
-        return {error: {type: 'NothingToRepeat', range: ctx.range}} as K.Result<never, RegexError>;
+        return { error: { type: 'NothingToRepeat', range: ctx.range } } as K.Result<never, RegexError>;
       })
     );
   }
@@ -44,7 +44,7 @@ export class JSREGrammar extends BaseGrammar {
       .map((a, ctx) => {
         let [body, quantifier] = a;
         if (!quantifier) return body;
-        return asNode<AST.RepeatNode>('Repeat')({quantifier, body}, ctx);
+        return asNode<AST.RepeatNode>('Repeat')({ quantifier, body }, ctx);
       });
   }
   Assertion(): RegexParser<AST.AssertionNode> {
@@ -68,7 +68,7 @@ export class JSREGrammar extends BaseGrammar {
   }
 
   Group() {
-    return P.bind({behavior: this.GroupBehavior()}, {body: this.Main()})
+    return P.bind({ behavior: this.GroupBehavior() }, { body: this.Main() })
       .between(this.openParen, this.closeParen)
       .map(asNode<AST.GroupNode>('Group'));
   }
@@ -78,23 +78,23 @@ export class JSREGrammar extends BaseGrammar {
   GroupNameBackref = P.exact('\\k')
     .thenR(this.GroupName)
     .mapE((name, ctx) => {
-      return {value: asNode<AST.BackrefNode>('Backref')({index: name}, ctx)};
+      return { value: asNode<AST.BackrefNode>('Backref')({ index: name }, ctx) };
     });
 
   GroupBehavior(): RegexParser<AST.GroupBehavior> {
     return P.alts(
-      P.exact('?:').map(_ => ({type: 'NonCapturing' as const})),
+      P.exact('?:').map(_ => ({ type: 'NonCapturing' as const })),
       P.exact('?')
         .thenR(this.GroupName)
         .opt()
-        .map(name => (name ? {type: 'Capturing' as const, index: 0, name} : {type: 'Capturing' as const, index: 0}))
+        .map(name => (name ? { type: 'Capturing' as const, index: 0, name } : { type: 'Capturing' as const, index: 0 }))
     );
   }
 
   /** This loose mode lexer is not used in strict whole parsing */
   Lexer(): RegexParser<Lexeme[]> {
-    const asLexeme = (type: RawLexeme['type']) => (_: any, {range}: {range: TokenRange}) =>
-      ({type, range} as RawLexeme);
+    const asLexeme = (type: RawLexeme['type']) => (_: any, { range }: { range: TokenRange }) =>
+      ({ type, range } as RawLexeme);
     let asBracket = asLexeme('CharClassBracket');
     let asParen = asLexeme('Paren');
 
@@ -115,7 +115,7 @@ export class JSREGrammar extends BaseGrammar {
           P.alts(
             P.re(/\?(:|<[^<>]*>)/)
               .slice()
-              .map((_, ctx) => ({type: 'GroupBehavior' as const, range: ctx.range})),
+              .map((_, ctx) => ({ type: 'GroupBehavior' as const, range: ctx.range })),
             P.alts(...Object.keys(groupAssertionTypeMap).map(P.exact)).map((_, ctx) => ({
               type: 'GroupAssertionBehavior' as const,
               range: ctx.range
@@ -162,25 +162,25 @@ export function parse(re: string | RegExp, flags?: AST.RegexFlags, partial = fal
   let state: RegexParseState = {
     flags,
     openPairs: [],
-    features: {legacy: {}}
+    features: { legacy: {} }
   };
 
   let result = grammar.parseWithState(re, state);
   if (!K.isResultOK(result)) {
     let u = result.error.userError;
     let p = result.error.position;
-    return {error: u ? u : {type: 'SyntaxError', range: [p, p]}};
+    return { error: u ? u : { type: 'SyntaxError', range: [p, p] } };
   } else {
     if (!partial && result.consumed !== re.length) {
-      return {error: {type: 'SyntaxError', range: [result.consumed, result.consumed]}};
+      return { error: { type: 'SyntaxError', range: [result.consumed, result.consumed] } };
     }
-    let regex = {expr: result.value, source: re.slice(0, result.consumed), flags};
+    let regex = { expr: result.value, source: re.slice(0, result.consumed), flags };
     let error = check(regex.expr);
     if (error) {
-      return {error};
+      return { error };
     }
 
-    return {value: regex};
+    return { value: regex };
   }
 }
 

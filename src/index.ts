@@ -1,6 +1,6 @@
-import * as Parsec from './Parsec';
-import * as Kit from './Kit';
-import * as AST from './AST';
+import * as Parsec from './_parsec';
+import * as Kit from './_kit';
+import * as AST from './ast';
 import * as grammar from './grammar/';
 
-export {Parsec, Kit, AST, grammar};
+export { Parsec, Kit, AST, grammar };

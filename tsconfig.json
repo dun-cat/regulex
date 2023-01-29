@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     // "skipLibCheck": true,
-    "outDir": "build",
+    "outDir": "./dist/",
     "target": "ES6",
     "module": "commonjs",
     "sourceMap": true,

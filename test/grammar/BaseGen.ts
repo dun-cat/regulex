@@ -1,21 +1,21 @@
 import * as FC from 'fast-check';
-import * as K from '../../src/Kit';
-import {genInCharset, property, prettyPrint} from '../utils';
-import {produce} from 'immer';
+import * as K from '../../src/_kit';
+import { genInCharset, property, prettyPrint } from '../utils';
+import { produce } from 'immer';
 import * as _ from 'lodash';
-import * as UnicodeProperty from '../../src/UnicodeProperty';
-import {Omit} from 'utility-types';
-import Unicode from '../../src/Unicode';
+import * as UnicodeProperty from '../../src/_unicode-property';
+import { Omit } from 'utility-types';
+import Unicode from '../../src/_unicode';
 
-import * as AST from '../../src/AST';
-import * as JSRE from '../../src/grammar/JSRE';
-import * as GBase from '../../src/grammar/Base';
+import * as AST from '../../src/ast';
+import * as JSRE from '../../src/grammar/jsre';
+import * as GBase from '../../src/grammar/_base';
 
 import * as path from 'path';
 import * as fs from 'fs';
-import {assert} from 'chai';
-import {AssertionError} from 'assert';
-import {Arbitrary} from 'fast-check';
+import { assert } from 'chai';
+import { AssertionError } from 'assert';
+import { Arbitrary } from 'fast-check';
 
 export interface TestCase<T> {
   expect: T;
@@ -46,7 +46,7 @@ export type GenState = Readonly<{
 }>;
 
 export function makeGenState(): GenState {
-  return {pos: 0, groups: {depth: 0, count: 0, names: []}, liveGroups: {indices: [], names: []}, liveGroupsBackup: []};
+  return { pos: 0, groups: { depth: 0, count: 0, names: [] }, liveGroups: { indices: [], names: [] }, liveGroupsBackup: [] };
 }
 
 export type GenFn<N extends AST.Node = AST.Expr> = (state: GenState) => GenNode<N>;
@@ -58,7 +58,7 @@ export function isSticky(t1: TestCase<any>, t2: TestCase<any>) {
   return /\\\d*$/.test(t1.source) && /^\d/.test(t2.source);
 }
 
-export type PartialTest<N extends AST.Node = AST.Node> = Omit<TestCase<Omit<N, 'range'>>, 'state'> & {state?: GenState};
+export type PartialTest<N extends AST.Node = AST.Node> = Omit<TestCase<Omit<N, 'range'>>, 'state'> & { state?: GenState };
 
 export function fixStateRange<N extends AST.Node>(initialState: GenState): (t: PartialTest<N>) => TestCase<N> {
   return t1 =>
@@ -69,17 +69,17 @@ export function fixStateRange<N extends AST.Node>(initialState: GenState): (t: P
 }
 
 export abstract class BaseGen {
-  constructor(public readonly flags: AST.RegexFlags, public readonly maxGroupDepth = 30) {}
+  constructor(public readonly flags: AST.RegexFlags, public readonly maxGroupDepth = 30) { }
 
   Dot(state: GenState): GenNode<AST.DotNode> {
     return FC.constant({
       source: '.',
-      expect: {type: 'Dot' as const}
+      expect: { type: 'Dot' as const }
     }).map(fixStateRange(state));
   }
 
   Char(state: GenState): GenNode<AST.CharNode> {
-    let {flags} = this;
+    let { flags } = this;
     let UnicodeEscape = flags.unicode
       ? FC.oneof(UtilGen.BaseUnicodeEscape, UtilGen.CodePointEscape, UtilGen.UnicodePairEscape)
       : UtilGen.BaseUnicodeEscape;
@@ -102,22 +102,22 @@ export abstract class BaseGen {
       .map(t => {
         return {
           source: t.source,
-          expect: {type: 'Char' as const, value: t.expect}
+          expect: { type: 'Char' as const, value: t.expect }
         };
       })
       .map(fixStateRange(state));
   }
 
   CharClassEscape(state: GenState): GenNode<AST.CharClassEscapeNode> {
-    let {flags} = this;
-    type T = {source: string; expect: AST.BaseCharClass | AST.UnicodeCharClass};
+    let { flags } = this;
+    type T = { source: string; expect: AST.BaseCharClass | AST.UnicodeCharClass };
     let gen = flags.unicode ? FC.oneof<T>(UtilGen.BaseCharClass, UtilGen.UnicodeCharClass) : UtilGen.BaseCharClass;
 
     return gen
       .map((t: T) => {
         return {
           source: '\\' + t.source,
-          expect: {type: 'CharClassEscape' as const, charClass: t.expect}
+          expect: { type: 'CharClassEscape' as const, charClass: t.expect }
         };
       })
       .map(fixStateRange(state));
@@ -162,11 +162,11 @@ export abstract class BaseGen {
       bodyFns: FC.array(genCharClassItemF)
     })
       .chain(t => {
-        let {invert, bodyFns} = t;
+        let { invert, bodyFns } = t;
         let state1 = produce(state, st => {
           st.pos += invert ? 2 : 1;
         });
-        let bodyGen = FC.constant({state: state1, source: '', expect: [] as AST.CharClassItem[]});
+        let bodyGen = FC.constant({ state: state1, source: '', expect: [] as AST.CharClassItem[] });
         for (let fn of bodyFns) {
           bodyGen = bodyGen.chain(acc => {
             return fn(acc.state).map(t2 => {
@@ -201,7 +201,7 @@ export abstract class BaseGen {
         let a = GBase.baseAssertionTypeMap[source];
         return {
           source,
-          expect: {type: 'BaseAssertion' as const, kind: a}
+          expect: { type: 'BaseAssertion' as const, kind: a }
         };
       })
       .map(fixStateRange(state));
@@ -209,23 +209,23 @@ export abstract class BaseGen {
 
   Backref(state: GenState): GenNode<AST.BackrefNode> {
     FC.pre(state.liveGroups.indices.length > 0);
-    type IndexGen = FC.Arbitrary<{source: string; index: number | string}>;
+    type IndexGen = FC.Arbitrary<{ source: string; index: number | string }>;
     let numRef: IndexGen = FC.constantFrom(...state.liveGroups.indices).map(i => {
-      return {source: '\\' + i, index: i};
+      return { source: '\\' + i, index: i };
     });
     let ref: IndexGen = numRef;
     if (state.liveGroups.names.length > 0) {
       let nameRef = FC.constantFrom(...state.liveGroups.names).map(n => {
-        return {source: '\\k<' + n + '>', index: n};
+        return { source: '\\k<' + n + '>', index: n };
       });
       ref = FC.oneof(numRef, nameRef);
     }
 
     return ref
-      .map(({source, index}) => {
+      .map(({ source, index }) => {
         return {
           source,
-          expect: {type: 'Backref' as const, index}
+          expect: { type: 'Backref' as const, index }
         };
       })
       .map(fixStateRange(state));
@@ -258,7 +258,7 @@ export abstract class BaseGen {
     let state1 = produce(state, st => void st.liveGroupsBackup.push(st.liveGroups));
 
     let bodyGen = FC.integer(2, 10).chain(n => {
-      let genAcc = FC.constant({source: [] as string[], expect: [] as AST.DisjunctionNode['body'], state: state1});
+      let genAcc = FC.constant({ source: [] as string[], expect: [] as AST.DisjunctionNode['body'], state: state1 });
       while (n--) {
         genAcc = genAcc.chain(acc => {
           let state2 = produce(acc.state, st => void (st.liveGroups = liveGroups0));
@@ -297,7 +297,7 @@ export abstract class BaseGen {
 
   List(state: GenState): GenNode<AST.ListNode> {
     let genBody: Arbitrary<TestCase<AST.ListNode['body']>> = FC.integer(0, this.maxGroupDepth).chain(n => {
-      let genAcc = FC.constant({source: '', state, expect: [] as AST.ListNode['body']});
+      let genAcc = FC.constant({ source: '', state, expect: [] as AST.ListNode['body'] });
       while (n--) {
         genAcc = genAcc.chain(acc => {
           return this.Expr(acc.state, ['List', 'Disjunction']).map(t => {
@@ -314,16 +314,16 @@ export abstract class BaseGen {
         if (t.expect.length === 1) {
           // When ListNode body only contains one node N, it will be unwrapped to N in parsing.
           // But here we must return a ListNode, so does the empty body
-          return {source: '', state, expect: []};
+          return { source: '', state, expect: [] };
         }
         return t;
       });
     });
 
-    return genBody.map(({source, state: newState, expect: body}) => ({
+    return genBody.map(({ source, state: newState, expect: body }) => ({
       source,
       state: newState,
-      expect: {type: 'List' as const, body, range: [state.pos, newState.pos]}
+      expect: { type: 'List' as const, body, range: [state.pos, newState.pos] }
     }));
   }
 
@@ -361,7 +361,7 @@ export abstract class BaseGen {
           range: [state.pos, newState.pos]
         };
 
-        return {source, expect, state: newState};
+        return { source, expect, state: newState };
       });
     });
   }
@@ -403,7 +403,7 @@ export abstract class BaseGen {
   }
 
   Quantifier(state: GenState): GenNode<AST.QuantifierNode> {
-    let baseQuantifiers = '+?*'.split('').map(c => ({source: c, expect: GBase.parseBaseQuantifier(c)}));
+    let baseQuantifiers = '+?*'.split('').map(c => ({ source: c, expect: GBase.parseBaseQuantifier(c) }));
 
     return FC.record({
       greedy: FC.boolean(),
@@ -413,15 +413,15 @@ export abstract class BaseGen {
           min: FC.nat(),
           max: FC.oneof(FC.nat(), FC.constant(Infinity))
         })
-          .filter(({min, max}) => min <= max)
-          .map(({min, max}) => {
-            let q = {type: 'Quantifier', min, max, greedy: true} as AST.QuantifierNode;
+          .filter(({ min, max }) => min <= max)
+          .map(({ min, max }) => {
+            let q = { type: 'Quantifier', min, max, greedy: true } as AST.QuantifierNode;
             let source = GBase.showQuantifier(q);
-            return {source, expect: q};
+            return { source, expect: q };
           })
       )
     })
-      .map(({greedy, test}) =>
+      .map(({ greedy, test }) =>
         produce(test, t => {
           t.expect.greedy = greedy;
           if (greedy === false) {
@@ -456,14 +456,14 @@ export module UtilGen {
   export const alphanum = K.Charset.fromPattern('A-Za-z0-9');
   export const alpha = K.Charset.fromPattern('A-Za-z');
 
-  export const Flags = FC.constant(AST.RegexFlags.create({unicode: true}));
+  export const Flags = FC.constant(AST.RegexFlags.create({ unicode: true }));
 
-  export const ExactChar16 = genInCharset(patternChar16).map(c => ({source: c, expect: c}));
-  export const ExactChar = genInCharset(patternChar).map(c => ({source: c, expect: c}));
-  export const AlphaChar = genInCharset(alpha).map(c => ({source: c, expect: c}));
-  export const AlphanumChar = genInCharset(alphanum).map(c => ({source: c, expect: c}));
+  export const ExactChar16 = genInCharset(patternChar16).map(c => ({ source: c, expect: c }));
+  export const ExactChar = genInCharset(patternChar).map(c => ({ source: c, expect: c }));
+  export const AlphaChar = genInCharset(alpha).map(c => ({ source: c, expect: c }));
+  export const AlphanumChar = genInCharset(alphanum).map(c => ({ source: c, expect: c }));
 
-  export const HexEscape = FC.char().map(c => ({source: K.Char.hexEscape(c), expect: c}));
+  export const HexEscape = FC.char().map(c => ({ source: K.Char.hexEscape(c), expect: c }));
   export const ControlEscape = FC.constantFrom(...'fnrtv').map(c => ({
     source: '\\' + c,
     expect: GBase.controlEscapeMap[c]
@@ -473,29 +473,29 @@ export module UtilGen {
     expect: K.Char.ctrl(c)
   }));
 
-  export const NullChar = FC.constant({source: '\\0', expect: '\0'});
+  export const NullChar = FC.constant({ source: '\\0', expect: '\0' });
 
-  export const BaseUnicodeEscape = FC.unicode().map(c => ({source: K.Char.unicodeEscape(c), expect: c}));
-  export const CodePointEscape = FC.fullUnicode().map(c => ({source: K.Char.codePointEscape(c), expect: c}));
+  export const BaseUnicodeEscape = FC.unicode().map(c => ({ source: K.Char.unicodeEscape(c), expect: c }));
+  export const CodePointEscape = FC.fullUnicode().map(c => ({ source: K.Char.codePointEscape(c), expect: c }));
   export const UnicodePairEscape = FC.integer(0x10000, K.Char.MAX_CODE_POINT).map(cp => {
     let c = String.fromCodePoint(cp);
-    return {source: K.escapeUnicodes(c, false), expect: c};
+    return { source: K.escapeUnicodes(c, false), expect: c };
   });
 
-  export const IdentityEscape = FC.constantFrom(...(GBase.syntaxChars + '/')).map(c => ({source: '\\' + c, expect: c}));
+  export const IdentityEscape = FC.constantFrom(...(GBase.syntaxChars + '/')).map(c => ({ source: '\\' + c, expect: c }));
 
   export const BaseCharClass = FC.constantFrom(
-    ...Object.entries(GBase.charClassEscapeTypeMap).map(a => ({source: a[0], expect: a[1]}))
+    ...Object.entries(GBase.charClassEscapeTypeMap).map(a => ({ source: a[0], expect: a[1] }))
   );
 
   export const BinaryUnicodeCharClass: FC.Arbitrary<AST.UnicodeCharClass> = FC.constantFrom(
     ...UnicodeProperty.canonical.Binary_Property
-  ).map(name => ({name, invert: false}));
+  ).map(name => ({ name, invert: false }));
 
   export const NonBinaryUnicodeCharClass: FC.Arbitrary<AST.UnicodeCharClass> = FC.constantFrom(
     ...UnicodeProperty.canonical.NonBinary_Property
   ).chain(name =>
-    FC.constantFrom(...K.IndexSig(UnicodeProperty.canonical)[name]).map(value => ({name, value, invert: false}))
+    FC.constantFrom(...K.IndexSig(UnicodeProperty.canonical)[name]).map(value => ({ name, value, invert: false }))
   );
 
   export const UnicodeCharClass = FC.record({
@@ -504,7 +504,7 @@ export module UtilGen {
   })
     .map(c => produce(c.cat, a => void (a.invert = c.invert)))
     .chain(cat =>
-      FC.constantFrom(...getAliasForms(cat).map(s => ({source: (cat.invert ? 'P' : 'p') + '{' + s + '}', expect: cat})))
+      FC.constantFrom(...getAliasForms(cat).map(s => ({ source: (cat.invert ? 'P' : 'p') + '{' + s + '}', expect: cat })))
     );
 
   const invAliasMap = K.invertMap(UnicodeProperty.aliasMap);
@@ -548,9 +548,9 @@ export function cleanNodeRange(node: AST.Node): void {
 export function runGrammarTest(
   title: string,
   parse: typeof JSRE.parse,
-  gen: Arbitrary<{flags: AST.RegexFlags; testCase: TestCase<AST.Node>}>
+  gen: Arbitrary<{ flags: AST.RegexFlags; testCase: TestCase<AST.Node> }>
 ) {
-  let runProp = property(gen, ({testCase, flags}) => {
+  let runProp = property(gen, ({ testCase, flags }) => {
     let result = parse(testCase.source, flags);
     if (!K.isResultOK(result)) {
       assert(K.isResultOK(result));
@@ -579,15 +579,15 @@ export function runGrammarTest(
     } catch (e) {
       if (e instanceof AssertionError) {
         let errorLog = './test/log/grammar/' + path.basename(__filename);
-        fs.mkdirSync('./test/log/grammar/', {recursive: true});
+        fs.mkdirSync('./test/log/grammar/', { recursive: true });
         fs.writeFileSync(
           errorLog,
           'export const expected = ' +
-            prettyPrint(e.expected) +
-            ';\n' +
-            'export const actual = ' +
-            prettyPrint(e.actual) +
-            ';\n'
+          prettyPrint(e.expected) +
+          ';\n' +
+          'export const actual = ' +
+          prettyPrint(e.actual) +
+          ';\n'
         );
         console.error('See error log:' + errorLog);
       }

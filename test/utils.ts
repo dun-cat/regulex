@@ -1,5 +1,5 @@
 import * as C from 'fast-check';
-import * as K from '../src/Kit';
+import * as K from '../src/_kit';
 import { AssertionError } from 'assert';
 import * as PropertyGeneric from 'fast-check/lib/check/property/Property.generic';
 

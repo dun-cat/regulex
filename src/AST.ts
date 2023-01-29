@@ -1,6 +1,6 @@
-import {TokenRange} from './Parsec';
-import {SubstIn} from './Kit';
-import * as K from './Kit';
+import { TokenRange } from './Parsec';
+import { SubstIn } from './_kit';
+import * as K from './_kit';
 import * as UT from 'utility-types';
 
 export interface NodeBase {
@@ -24,7 +24,7 @@ export interface BackrefNode extends NodeBase {
   index: number | string;
 }
 
-export type UnicodeCharClass = {name: string; invert: boolean; value?: string};
+export type UnicodeCharClass = { name: string; invert: boolean; value?: string };
 export const baseCharClassTuple = ['Digit', 'NonDigit', 'Word', 'NonWord', 'Space', 'NonSpace'] as const;
 export type BaseCharClass = typeof baseCharClassTuple[number];
 
@@ -72,10 +72,10 @@ export interface DisjunctionNode extends NodeBase {
 }
 
 export type GroupBehavior =
-  | {type: 'Capturing'; index: number; name?: string}
-  | {type: 'NonCapturing'}
-  | {type: 'Atomic'}
-  | {type: 'EnableDup'};
+  | { type: 'Capturing'; index: number; name?: string }
+  | { type: 'NonCapturing' }
+  | { type: 'Atomic' }
+  | { type: 'EnableDup' };
 
 export interface GroupNode extends NodeBase {
   type: 'Group';
@@ -142,15 +142,15 @@ export class RegexFlags {
     }
     if (strict) {
       if (invalid.length) {
-        return {error: K.sortUnique(invalid).join('')};
+        return { error: K.sortUnique(invalid).join('') };
       } else {
-        return {value: reFlag};
+        return { value: reFlag };
       }
     }
     return reFlag;
   }
 
-  static create(props?: {[K in UT.NonFunctionKeys<RegexFlags>]?: boolean}): RegexFlags {
+  static create(props?: { [K in UT.NonFunctionKeys<RegexFlags>]?: boolean }): RegexFlags {
     let a = new RegexFlags();
     if (props) {
       Object.assign(a, props);
@@ -214,7 +214,7 @@ export function isEmptyNode<X = any>(node: NodeF<X>): node is SubstIn<ListNode, 
 export function makeEmptyNode(position?: number): ListNode;
 export function makeEmptyNode<X = any>(position?: number): SubstIn<ListNode, Node, X>;
 export function makeEmptyNode<X = any>(position = 0): SubstIn<ListNode, Node, X> {
-  return {type: 'List', body: [], range: [position, position]};
+  return { type: 'List', body: [], range: [position, position] };
 }
 
 const _BranchNodeTypeTuple = [
@@ -243,25 +243,25 @@ export interface INode extends NodeBase {
   type: Node['type'];
 }
 
-export type PickByNodeType<N extends INode, T extends Node['type']> = N extends {type: T} ? N : never;
+export type PickByNodeType<N extends INode, T extends Node['type']> = N extends { type: T } ? N : never;
 export type NodeOfType<T extends INode['type']> = PickByNodeType<Node, T>;
 
 type VisitorFn<N extends INode, K extends N['type']> = (cur: PickByNodeType<N, K>, parent?: N) => void;
 type VisitorCase<N extends INode, K extends N['type']> =
   | VisitorFn<N, K>
   | {
-      enter: VisitorFn<N, K>;
-      leave: VisitorFn<N, K>;
-    };
+    enter: VisitorFn<N, K>;
+    leave: VisitorFn<N, K>;
+  };
 
 /**
 Simple stateful visitor function executed top down or custom enter leave
 */
-export type FullVisitor<N extends INode = Node> = {[K in N['type']]: VisitorCase<N, K>};
+export type FullVisitor<N extends INode = Node> = { [K in N['type']]: VisitorCase<N, K> };
 
 export type Visitor<N extends INode = Node> =
   | FullVisitor<N>
-  | (UT.DeepPartial<FullVisitor<N>> & {defaults: VisitorCase<N, N['type']>});
+  | (UT.DeepPartial<FullVisitor<N>> & { defaults: VisitorCase<N, N['type']> });
 
 export type FullMatchClause<A, B, N extends INode = Node> = {
   [K in N['type']]: (node: A extends N ? PickByNodeType<N, K> : SubstIn<PickByNodeType<N, K>, N, A>) => B;
@@ -269,7 +269,7 @@ export type FullMatchClause<A, B, N extends INode = Node> = {
 
 export type MatchClause<A, B, N extends INode = Node> =
   | FullMatchClause<A, B, N>
-  | (Partial<FullMatchClause<A, B, N>> & {defaults: (node: A extends N ? N : SubstIn<N, N, A>) => B});
+  | (Partial<FullMatchClause<A, B, N>> & { defaults: (node: A extends N ? N : SubstIn<N, N, A>) => B });
 
 export type NodeF<X, N = Node> = SubstIn<N, N, X>;
 
@@ -377,7 +377,7 @@ export interface RegexGroupsInfo {
 export function getGroupsInfo(re: Node, _renumber: boolean): RegexGroupsInfo;
 export function getGroupsInfo(re: NodeF<any>, _renumber: boolean): RegexGroupsInfo;
 export function getGroupsInfo(re: Node, _renumber = false): RegexGroupsInfo {
-  let groups = {count: 0, names: new Set<string>()};
+  let groups = { count: 0, names: new Set<string>() };
 
   visit(re, {
     Group(n) {
@@ -391,7 +391,7 @@ export function getGroupsInfo(re: Node, _renumber = false): RegexGroupsInfo {
         }
       }
     },
-    defaults() {}
+    defaults() { }
   });
 
   return groups;

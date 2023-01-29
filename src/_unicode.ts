@@ -1,4 +1,4 @@
-import {Charset} from './Kit';
+import { Charset } from './_kit';
 const P = Charset.fromPattern;
 
 const ScriptCommon = {

@@ -7,7 +7,7 @@
     "email": "i@jex.im",
     "url": "https://jex.im/"
   },
-  "main": "./build/src/index",
+  "main": "./dist/src/index",
   "files": [
     "build",
     "src",
@@ -68,6 +68,7 @@
     "webpack-shell-plugin-next": "^2.3.1"
   },
   "scripts": {
+    "output": "webpack build",
     "serve": "webpack serve",
     "cssd": "tcm ./src/web/",
     "build": "npm run cssd && tsc && npm run format",

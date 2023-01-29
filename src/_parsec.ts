@@ -1,6 +1,6 @@
-import * as K from './Kit';
-import {Err, Result, isResultOK, InterU} from './Kit';
-import {$Values} from 'utility-types';
+import * as K from './_kit';
+import { Err, Result, isResultOK, InterU } from './_kit';
+import { $Values } from 'utility-types';
 
 /**
 Not Really Parser Combinator
@@ -32,7 +32,7 @@ class ParseCtx<S extends K.Stream<S>, State, UserError> {
   public range: TokenRange = [0, 0];
   public readonly recurMemo: Map<
     Parser<S, any, State, UserError>,
-    Map<number, {position: number; state: State; result: SimpleResult<any, UserError>}>
+    Map<number, { position: number; state: State; result: SimpleResult<any, UserError> }>
   >;
 
   constructor(public readonly input: S, public state: State) {
@@ -61,7 +61,7 @@ export abstract class Parser<S extends K.Stream<S>, A, State, UserError> {
   map<B>(f: (v: A, ctx: TokenCtx<S, State>) => B): Parser<S, B, State, UserError> {
     return MapF.compose(this, (r, ctx) => {
       if (isResultOK(r)) {
-        return {value: f(r.value, ctx)};
+        return { value: f(r.value, ctx) };
       } else {
         return r;
       }
@@ -201,7 +201,7 @@ export abstract class Parser<S extends K.Stream<S>, A, State, UserError> {
   isNullable(): boolean {
     if (typeof this._nullable === 'boolean') return this._nullable;
     // Default true to prevent left recursion.
-    Object.defineProperty(this, '_nullable', {value: true, writable: true});
+    Object.defineProperty(this, '_nullable', { value: true, writable: true });
     return (this._nullable = this._checkNullable());
   }
 
@@ -218,7 +218,7 @@ export abstract class Parser<S extends K.Stream<S>, A, State, UserError> {
     } else {
       // To hide trivial private properties from debug inspector
       // Default true to prevent recursion
-      Object.defineProperty(this, '_dereferenced', {value: true, writable: true});
+      Object.defineProperty(this, '_dereferenced', { value: true, writable: true });
       return this._deref();
     }
   }
@@ -244,7 +244,7 @@ export abstract class Parser<S extends K.Stream<S>, A, State, UserError> {
   }
 }
 
-export type FResult<A, UserError> = Result<A, UserError | string | true> & {consumed: number};
+export type FResult<A, UserError> = Result<A, UserError | string | true> & { consumed: number };
 export class FParser<S extends K.Stream<S>, A, State, UserError> extends Parser<S, A, State, UserError> {
   constructor(
     private _f: (context: {
@@ -273,7 +273,7 @@ export class FParser<S extends K.Stream<S>, A, State, UserError> extends Parser<
       return errorResult;
     } else {
       context.position += result.consumed;
-      return {value: result.value};
+      return { value: result.value };
     }
   }
 }
@@ -400,11 +400,11 @@ export class Optional<S extends K.Stream<S>, A, State, UserError> extends Parser
     super();
   }
   _parseWith(context: ParseCtx<S, State, UserError>): SimpleResult<K.Maybe<A>, UserError> {
-    let {position, state} = context;
+    let { position, state } = context;
     let result = this._p._parseWith(context);
     if (!isResultOK(result) && context.position === position) {
       context.state = state;
-      return {value: undefined};
+      return { value: undefined };
     }
     return result;
   }
@@ -428,7 +428,7 @@ export class TryParser<S extends K.Stream<S>, A, State, UserError> extends Parse
     super();
   }
   _parseWith(context: ParseCtx<S, State, UserError>): SimpleResult<A, UserError> {
-    let {position, state} = context;
+    let { position, state } = context;
     let result = this._p._parseWith(context);
     if (!isResultOK(result)) {
       context.position = position;
@@ -462,14 +462,14 @@ export class Lookahead<S extends K.Stream<S>, A, State, UserError> extends Parse
   _parseWith(context: ParseCtx<S, State, UserError>): SimpleResult<A, UserError> {
     let result = this._p._parseWith(context);
     if (isResultOK(result)) {
-      let {position, state} = context;
+      let { position, state } = context;
       let a = this._look._parseWith(context);
       context.position = position;
       context.state = state;
 
       let ok = isResultOK(a);
       if (ok === this._negative) {
-        if (ok) return {error: {position: position, parser: this}};
+        if (ok) return { error: { position: position, parser: this } };
         else return a;
       }
     }
@@ -523,7 +523,7 @@ export class Seqs<S extends K.Stream<S>, A extends Array<any>, State, UserError>
       }
     }
 
-    return {value};
+    return { value };
   }
 
   _checkNullable() {
@@ -569,7 +569,7 @@ export class Alts<S extends K.Stream<S>, A, State, UserError> extends Parser<S, 
     let len = plist.length;
     let result;
     let i = 0;
-    let {position, state} = context;
+    let { position, state } = context;
     do {
       result = plist[i]._parseWith(context);
       if (isResultOK(result) || context.position !== position) return result;
@@ -629,7 +629,7 @@ export class Repeat<S extends K.Stream<S>, A, State, UserError> extends Parser<S
       }
     }
 
-    return {value};
+    return { value };
   }
 
   isNullable() {
@@ -656,7 +656,7 @@ export class Repeat<S extends K.Stream<S>, A, State, UserError> extends Parser<S
 // @singleton
 class Empty<State, UserError> extends Parser<any, undefined, State, UserError> {
   _parseWith(context: ParseCtx<any, State, UserError>): SimpleResult<undefined, UserError> {
-    return {value: undefined};
+    return { value: undefined };
   }
 
   isNullable() {
@@ -667,8 +667,8 @@ class Empty<State, UserError> extends Parser<any, undefined, State, UserError> {
 // @singleton
 class EOF<State, UserError> extends Empty<State, UserError> {
   _parseWith(context: ParseCtx<any, State, UserError>): SimpleResult<undefined, UserError> {
-    if (context.position === context.input.length) return {value: undefined};
-    else return {error: {position: context.position, parser: this}};
+    if (context.position === context.input.length) return { value: undefined };
+    else return { error: { position: context.position, parser: this } };
   }
 }
 
@@ -678,7 +678,7 @@ class FailParser<State, UserError> extends Parser<any, never, State, UserError> 
   }
 
   _parseWith(context: ParseCtx<any, State, UserError>) {
-    let a: Failed<UserError> = {error: {parser: this, position: context.position, message: this._msg}};
+    let a: Failed<UserError> = { error: { parser: this, position: context.position, message: this._msg } };
     if (this._userError !== undefined) {
       a.error.userError = this._userError;
     }
@@ -698,13 +698,13 @@ export class Exact<S extends K.Stream<S>, State, UserError> extends Parser<S, S,
 
   _parseWith(context: ParseCtx<S, State, UserError>): SimpleResult<S, UserError> {
     let l = this._s.length;
-    let {input, position} = context;
+    let { input, position } = context;
     let s = input.slice(position, position + l);
     if (s === this._s || K.deepEqual(s, this._s)) {
       context.position += l;
-      return {value: this._s};
+      return { value: this._s };
     } else {
-      return {error: {position: position, parser: this}};
+      return { error: { position: position, parser: this } };
     }
   }
 
@@ -744,18 +744,18 @@ function _counts<State, UserError>(
 abstract class CharsetBase<State, UserError> extends Parser<string, string, State, UserError>
   implements RegexRepeat<State, UserError> {
   _parseWith(context: ParseCtx<string, State, UserError>): SimpleResult<string, UserError> {
-    let {position, input} = context;
+    let { position, input } = context;
     let cp = input.codePointAt(position);
     if (typeof cp === 'undefined') {
       return {
-        error: {position: position, parser: this, message: 'EOF'}
+        error: { position: position, parser: this, message: 'EOF' }
       };
     } else if (this._includeCodePoint(cp)) {
       let c = String.fromCodePoint(cp);
       context.position += c.length;
-      return {value: c};
+      return { value: c };
     } else {
-      return {error: {position: position, parser: this}};
+      return { error: { position: position, parser: this } };
     }
   }
 
@@ -842,14 +842,14 @@ export class MatchRegex<State, UserError> extends Parser<string, string[] & RegE
   }
 
   _parseWith(context: ParseCtx<string, State, UserError>): SimpleResult<string[] & RegExpExecArray, UserError> {
-    let {input, position} = context;
+    let { input, position } = context;
     this._re.lastIndex = position;
     let m = this._re.exec(input);
     if (m === null) {
-      return {error: {position: position, parser: this}};
+      return { error: { position: position, parser: this } };
     } else {
       context.position += m[0].length;
-      return {value: m};
+      return { value: m };
     }
   }
 
@@ -914,7 +914,7 @@ class LeftRecur<S extends K.Stream<S>, A, State, UserError> extends Parser<S, A,
     if (_p.isNullable()) throw new Error('LeftRecur on nullable parser:' + _p.desc());
   }
   _parseWith(context: ParseCtx<S, State, UserError>): SimpleResult<A, UserError> {
-    let {recurMemo, position, state} = context;
+    let { recurMemo, position, state } = context;
     let memoMap = recurMemo.get(this);
     if (!memoMap) {
       memoMap = new Map();
@@ -932,7 +932,7 @@ class LeftRecur<S extends K.Stream<S>, A, State, UserError> extends Parser<S, A,
     last = {
       position: position,
       state: state,
-      result: {error: {position: position, parser: this}}
+      result: { error: { position: position, parser: this } }
     };
     memoMap.set(position, last);
 
@@ -1023,7 +1023,7 @@ export class Grammar<T> {
     let ruleNames = getDefRuleNames(_rawDef).filter(k => rawDef[k] instanceof Function || rawDef[k] instanceof Parser);
     let ruleMap: AnyParserMap = Object.create(null);
     let thisObject: AnyParserDefMap = Object.create(null);
-    let refMap: {[ruleName: string]: Ref} = Object.create(null);
+    let refMap: { [ruleName: string]: Ref } = Object.create(null);
 
     for (let k of ruleNames) {
       let p = rawDef[k];
@@ -1082,11 +1082,11 @@ export class Grammar<T> {
   parseWithState: T extends GrammarMainDef<infer S, infer A, infer State, infer UserError>
     ? (s: S, initalState: State) => ParseResult<A, State, UserError>
     : never = ((s: any, initalState: any = null) => {
-    let rules = this.rules as any;
-    if (rules.Main) {
-      return rules.Main.parse(s, initalState);
-    }
-  }) as any;
+      let rules = this.rules as any;
+      if (rules.Main) {
+        return rules.Main.parse(s, initalState);
+      }
+    }) as any;
 
   parse: T extends GrammarMainDef<infer S, infer A, null, infer UserError>
     ? (s: S) => ParseResult<A, null, UserError>
@@ -1107,13 +1107,13 @@ export function refine<S extends K.Stream<S>, State, UserError>() {
   Parse by a custom function, it must return a consumed number in order to increase the position
   */
   function parseBy<A, _S extends K.Stream<_S> = S, St = State, UErr = UserError>(
-    f: (context: {readonly input: _S; readonly position: number; readonly state: St}) => FResult<A, UErr>
+    f: (context: { readonly input: _S; readonly position: number; readonly state: St }) => FResult<A, UErr>
   ) {
     return new FParser(f);
   }
 
   function getState<St = State, UErr = UserError>(): Parser<any, St, St, UErr> {
-    return parseBy(ctx => ({value: ctx.state, consumed: 0}));
+    return parseBy(ctx => ({ value: ctx.state, consumed: 0 }));
   }
 
   function re<St = State, UErr = UserError>(re: RegExp): MatchRegex<St, UErr> {
@@ -1144,13 +1144,13 @@ export function refine<S extends K.Stream<S>, State, UserError>() {
     spaces1: re(/\s+/),
 
     pure<A, St = State, UErr = UserError>(a: A): Parser<any, A, St, UErr> {
-      return parseBy(_ => ({value: a, consumed: 0}));
+      return parseBy(_ => ({ value: a, consumed: 0 }));
     },
 
     anyChar: new FParser<string, string, State, UserError>(ctx => {
       let cp = ctx.input.codePointAt(ctx.position);
       if (typeof cp === 'undefined') {
-        return {error: 'EOF', consumed: 0};
+        return { error: 'EOF', consumed: 0 };
       } else {
         let c = String.fromCodePoint(cp);
         return {
@@ -1193,7 +1193,7 @@ export function refine<S extends K.Stream<S>, State, UserError>() {
   function alts(): never;
   function alts(p: any): never;
   function alts<A extends [any, any, ...any[]], _S extends K.Stream<_S> = S, St = State, UErr = UserError>(
-    ...parsers: {[I in keyof A]: Parser<_S, A[I], St, UErr>}
+    ...parsers: { [I in keyof A]: Parser<_S, A[I], St, UErr> }
   ): Alts<_S, A[number], St, UErr>;
   function alts<T, _S extends K.Stream<_S> = S, St = State, UErr = UserError>(
     ...parsers: Array<Parser<_S, T, St, UErr>>
@@ -1205,7 +1205,7 @@ export function refine<S extends K.Stream<S>, State, UserError>() {
   function seqs(): never;
   function seqs(p: any): never;
   function seqs<A extends [any, any, ...any[]], _S extends K.Stream<_S> = S, St = State, UErr = UserError>(
-    ...parsers: {[I in keyof A]: Parser<_S, A[I], St, UErr>}
+    ...parsers: { [I in keyof A]: Parser<_S, A[I], St, UErr> }
   ): Seqs<_S, A, St, UErr>;
   function seqs<T, _S extends K.Stream<_S> = S, St = State, UErr = UserError>(
     ...parsers: Array<Parser<_S, T, St, UErr>>
@@ -1226,28 +1226,28 @@ export function refine<S extends K.Stream<S>, State, UserError>() {
   */
   function bind(): never;
   function bind<M extends [any, ...any[]], _S extends K.Stream<_S> = S, St = State, UErr = UserError>(
-    ...bindings: {[I in keyof M]: {[K in keyof M[I]]: Parser<_S, M[I][K], St, UErr>}}
-  ): Parser<_S, {[K in keyof InterU<M[number]>]: InterU<M[number]>[K]}, St, UErr>;
+    ...bindings: { [I in keyof M]: { [K in keyof M[I]]: Parser<_S, M[I][K], St, UErr> } }
+  ): Parser<_S, { [K in keyof InterU<M[number]>]: InterU<M[number]>[K] }, St, UErr>;
   function bind<A, _S extends K.Stream<_S> = S, St = State, UErr = UserError>(
-    ...bindings: Array<{[k: string]: Parser<_S, A, St, UErr>}>
-  ): Parser<_S, {[k: string]: A}, St, UErr>;
+    ...bindings: Array<{ [k: string]: Parser<_S, A, St, UErr> }>
+  ): Parser<_S, { [k: string]: A }, St, UErr>;
   function bind<_S extends K.Stream<_S> = S, St = State, UErr = UserError>(
     ..._bindings: any
   ): Parser<_S, any, St, UErr> {
-    let bindings = _bindings as Array<{[k: string]: Parser<_S, any, St, UErr>}>;
+    let bindings = _bindings as Array<{ [k: string]: Parser<_S, any, St, UErr> }>;
 
-    let {names, parsers} = bindings.reduce(
+    let { names, parsers } = bindings.reduce(
       (prev, cur) => {
         prev.names = prev.names.concat(Object.keys(cur));
         prev.parsers = prev.parsers.concat(Object.values(cur));
 
         return prev;
       },
-      {names: [] as string[], parsers: [] as Array<Parser<_S, any, St, UErr>>}
+      { names: [] as string[], parsers: [] as Array<Parser<_S, any, St, UErr>> }
     );
 
     let seq = new Seqs(parsers).map(values => {
-      let a: {[k: string]: any} = {} as any;
+      let a: { [k: string]: any } = {} as any;
       for (let i = 0; i < names.length; i++) {
         a[names[i]] = values[i];
       }

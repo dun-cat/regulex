@@ -1,15 +1,15 @@
-import {h} from './HTML';
-import {EventEmitter, SyntheticEvent, EventsMap} from './EventEmitter';
-import {TextEditor, LEFT_ARROW_KEYCODE} from './TextEditor';
-import * as css from './style/RegexEditor.local.css';
-import * as AST from '../AST';
-import * as K from '../Kit';
-import {RegexError} from '../grammar/Base';
+import { h } from './html';
+import { EventEmitter, SyntheticEvent, EventsMap } from './event-emitter';
+import { TextEditor, LEFT_ARROW_KEYCODE } from './TextEditor';
+import * as css from './style/_regex-editor.local.css';
+import * as AST from '../_ast';
+import * as K from '../_kit';
+import { RegexError } from '../grammar/_base';
 import * as JSRE from '../grammar/JSRE';
 
-export type RegexValidateError = RegexError | {type: 'Flags'; invalid: string};
+export type RegexValidateError = RegexError | { type: 'Flags'; invalid: string };
 
-export type RegexEditorEvents = {change: SyntheticEvent & {resultRegex: K.Result<AST.Regex, RegexValidateError>}};
+export type RegexEditorEvents = { change: SyntheticEvent & { resultRegex: K.Result<AST.Regex, RegexValidateError> } };
 
 export interface RegexEditorConfig {
   source: string;
@@ -25,14 +25,14 @@ export class RegexEditor extends EventEmitter<RegexEditorEvents> {
   };
 
   private readonly _sourceEditor = new TextEditor();
-  private readonly _flagsInput = h.input({className: css.flagsInput, value: 'u', maxLength: 8});
+  private readonly _flagsInput = h.input({ className: css.flagsInput, value: '', maxLength: 8 });
 
   public readonly ele = h.div(
-    {className: css.editorCt},
-    h.div({className: css.slash}),
+    { className: css.editorCt },
+    h.div({ className: css.slash }),
     this._sourceEditor.ele,
-    h.div({className: css.endSlash + ' ' + css.slash}),
-    h.div({className: css.flagsInputCt}, this._flagsInput)
+    h.div({ className: css.endSlash + ' ' + css.slash }),
+    h.div({ className: css.flagsInputCt }, this._flagsInput)
   );
 
   public readonly config: RegexEditorConfig;
@@ -95,10 +95,11 @@ export class RegexEditor extends EventEmitter<RegexEditorEvents> {
   }
 
   public getRegex(): K.Result<AST.Regex, RegexValidateError> {
-    let {source, flags} = this.getRawText();
+    let { source, flags } = this.getRawText();
+    console.log("flags", flags)
     let flagsResult = AST.RegexFlags.parse(flags, true);
     if (!K.isResultOK(flagsResult)) {
-      return K.Err({type: 'Flags', invalid: flagsResult.error});
+      return K.Err({ type: 'Flags', invalid: flagsResult.error });
     }
 
     let regexFlags = flagsResult.value;
@@ -107,7 +108,7 @@ export class RegexEditor extends EventEmitter<RegexEditorEvents> {
     return regexResult;
   }
 
-  public getRawText(): {source: string; flags: string} {
+  public getRawText(): { source: string; flags: string } {
     return {
       source: this._sourceEditor.getTextContent(),
       flags: this._flagsInput.value

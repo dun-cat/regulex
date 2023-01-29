@@ -1,10 +1,10 @@
-import * as K from '../src/Kit';
+import * as K from '../src/_kit';
 import * as C from 'fast-check';
-import {testProp, sampleInCharRange} from './utils';
-import {assert} from 'chai';
-import Unicode from '../src/Unicode';
-import * as UnicodeProperty from '../src/UnicodeProperty';
-import {factorize, DEFAULT_UNICODE_PKG} from '../src/tools/buildUnicode';
+import { testProp, sampleInCharRange } from './utils';
+import { assert } from 'chai';
+import Unicode from '../src/_unicode';
+import * as UnicodeProperty from '../src/_unicode-property';
+import { factorize, DEFAULT_UNICODE_PKG } from '../src/tools/buildUnicode';
 
 const charPairGen = () => C.tuple(C.fullUnicode(), C.fullUnicode());
 const charRangeGen = () =>
@@ -19,22 +19,22 @@ describe('Kit', () => {
     testProp('should be found', C.array(C.integer()), a => {
       a = a.sort(K.compare);
       for (let i = 0; i < a.length; i++) {
-        let {found, index} = K.bsearch(a, a[i]);
+        let { found, index } = K.bsearch(a, a[i]);
         assert(found && a[index] === a[i]);
       }
     });
 
     testProp('should be not found but stop at right index', C.array(C.integer()), a => {
       if (!a.length) {
-        var {found, index} = K.bsearch(a, 12345);
+        var { found, index } = K.bsearch(a, 12345);
         assert(!found && index === -1);
         return;
       }
 
       a = a.sort(K.compare);
-      var {found, index} = K.bsearch(a, a[0] - 1);
+      var { found, index } = K.bsearch(a, a[0] - 1);
       assert(!found && index === -1);
-      var {found, index} = K.bsearch(a, a[a.length - 1] + 1);
+      var { found, index } = K.bsearch(a, a[a.length - 1] + 1);
       assert(!found && index === a.length - 1);
 
       for (let i = 0; i < a.length - 1; i++) {
@@ -43,7 +43,7 @@ describe('Kit', () => {
         let x = (a[i] + a[i + 1]) / 2;
         // a[i] < x < a[i+1]
         // So it should not be found but stop at i
-        var {found, index} = K.bsearch(a, x);
+        var { found, index } = K.bsearch(a, x);
         assert(!found && index === i);
       }
     });
@@ -100,13 +100,13 @@ describe('Kit', () => {
     testProp('should include after coalesce', listOfCharRange(), a => {
       let ranges = K.CharRange.coalesce(a);
       for (let r of a) {
-        let {found, index} = K.bsearch(ranges, r, K.CharRange.compareIn);
+        let { found, index } = K.bsearch(ranges, r, K.CharRange.compareIn);
         assert(found && K.CharRange.isSubsetOf(r, ranges[index]));
       }
     });
   });
 
-  describe('Charset', function() {
+  describe('Charset', function () {
     this.timeout(60000);
 
     testProp('fromPattern toPattern equal', listOfCharRange(), a => {
@@ -179,9 +179,9 @@ describe('Kit', () => {
 
     // Impractical, took several seconds or even minutes to complete these tests
     if (false) {
-      let unicodeCats = (function() {
+      let unicodeCats = (function () {
         let a: string[] = [];
-        let U = Object.assign({}, UnicodeProperty.canonical) as {[k: string]: Set<string>};
+        let U = Object.assign({}, UnicodeProperty.canonical) as { [k: string]: Set<string> };
         delete U.NonBinary_Property;
         for (let k in U) {
           for (let cat of U[k]) {
@@ -216,7 +216,7 @@ describe('Kit', () => {
 
       testProp('factorize', C.array(listOfCharRange(), 1, 60), a => {
         let charsets = a.map(ranges => new K.Charset(ranges));
-        let {factors, mapping} = factorize(charsets);
+        let { factors, mapping } = factorize(charsets);
         if (factors.length) {
           assertNonOverlap(factors);
         } else {

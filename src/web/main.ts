@@ -1,6 +1,6 @@
-import {h, StyleValue} from './HTML';
+import { h, StyleValue } from './HTML';
 import * as K from '../Kit';
-import {RegexEditor} from './RegexEditor';
+import { RegexEditor } from './RegexEditor';
 import './style/main.css'; // Webpack sucks!
 
 document.addEventListener('DOMContentLoaded', main);
@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', main);
 function main() {
   let editor = new RegexEditor();
   let editorCt = byId('editorCt');
+  console.log("editorCt", editorCt)
   editor.renderTo(editorCt);
 
   let visualizeBtn = byId('visualizeBtn');

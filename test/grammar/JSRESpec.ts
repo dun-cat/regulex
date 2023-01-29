@@ -1,17 +1,17 @@
-import * as K from '../../src/Kit';
+import * as K from '../../src/_kit';
 import * as FC from 'fast-check';
-import {IndexSig} from '../../src/Kit';
-import {produce} from 'immer';
-import * as AST from '../../src/AST';
-import * as JSRE from '../../src/grammar/JSRE';
-import {BaseGen, runGrammarTest, GenState, TestCase, UtilGen, makeGenState, GenFn} from './BaseGen';
+import { IndexSig } from '../../src/_kit';
+import { produce } from 'immer';
+import * as AST from '../../src/ast';
+import * as JSRE from '../../src/grammar/jsre';
+import { BaseGen, runGrammarTest, GenState, TestCase, UtilGen, makeGenState, GenFn } from './BaseGen';
 
-import {assert} from 'chai';
-import {AssertionError} from 'assert';
+import { assert } from 'chai';
+import { AssertionError } from 'assert';
 
 export class JSREGen extends BaseGen {
   GroupBehavior(state: GenState): FC.Arbitrary<TestCase<AST.GroupBehavior>> {
-    let {flags} = this;
+    let { flags } = this;
 
     // shrink to BaseGroupName via constantFrom
     let BaseGroupName = FC.array(UtilGen.AlphaChar, 1, 20).map(a => a.map(t => t.expect).join(''));
@@ -25,19 +25,19 @@ export class JSREGen extends BaseGen {
 
     return FC.oneof(
       FC.constantFrom<TestCase<AST.GroupBehavior>>(
-        {source: '?:', expect: {type: 'NonCapturing'}, state: produce(state, st => void (st.pos += 2))},
-        {source: '', expect: {type: 'Capturing', index: state.groups.count + 1}, state}
+        { source: '?:', expect: { type: 'NonCapturing' }, state: produce(state, st => void (st.pos += 2)) },
+        { source: '', expect: { type: 'Capturing', index: state.groups.count + 1 }, state }
       ),
       GroupName.map(name => ({
         source: '?<' + name + '>',
         state: produce(state, st => void (st.pos += name.length + 3)),
-        expect: {type: 'Capturing', index: state.groups.count + 1, name}
+        expect: { type: 'Capturing', index: state.groups.count + 1, name }
       }))
     );
   }
 }
 
-describe('Grammar.JSRE', function() {
+describe('Grammar.JSRE', function () {
   this.timeout(1000000);
   let testTypes = [
     'Char',
@@ -61,7 +61,7 @@ describe('Grammar.JSRE', function() {
     runGrammarTest(
       ty,
       JSRE.parse,
-      gen.map(testCase => ({flags, testCase}))
+      gen.map(testCase => ({ flags, testCase }))
     );
   }
 });

@@ -1,13 +1,13 @@
-import {refine, Parser, TokenRange} from '../Parsec';
-import * as K from '../Kit';
-import {OK, Err, Charset} from '../Kit';
-import Unicode from '../Unicode';
-import * as UnicodeProperty from '../UnicodeProperty';
-import * as AST from '../AST';
-import {Omit} from 'utility-types';
-import * as Parsec from '../Parsec';
+import { refine, Parser, TokenRange } from '../_parsec';
+import * as K from '../_kit';
+import { OK, Err, Charset } from '../_kit';
+import Unicode from '../_unicode';
+import * as UnicodeProperty from '../_unicode-property';
+import * as AST from '../ast';
+import { Omit } from 'utility-types';
+import * as Parsec from '../_parsec';
 
-export {TokenRange} from '../Parsec';
+export { TokenRange } from '../_parsec';
 
 export type RawLexeme = {
   type: 'VBar' | 'Paren' | 'CharClassBracket' | 'GroupBehavior' | 'GroupAssertionBehavior';
@@ -18,23 +18,23 @@ export type Lexeme = AST.LeafNode | AST.CharRangeNode | RawLexeme;
 
 export type RegexError = {
   type:
-    | 'SyntaxError'
-    | 'ParenMismatch'
-    | 'OctEscape'
-    | 'IdentityEscape'
-    | 'NothingToRepeat'
-    | 'CharClassEscapeB'
-    | 'CharClassEscapeInRange'
-    | 'UnicodeEscape'
-    | 'UnicodeIDEscape'
-    | 'BackrefNotExist'
-    | 'BackrefEmpty'
-    | 'DupGroupName'
-    | 'QuantifierOutOfOrder'
-    | 'CharRangeOutOfOrder'
-    | 'Identifier'
-    | 'UnicodePropertyName'
-    | 'UnicodePropertyValue';
+  | 'SyntaxError'
+  | 'ParenMismatch'
+  | 'OctEscape'
+  | 'IdentityEscape'
+  | 'NothingToRepeat'
+  | 'CharClassEscapeB'
+  | 'CharClassEscapeInRange'
+  | 'UnicodeEscape'
+  | 'UnicodeIDEscape'
+  | 'BackrefNotExist'
+  | 'BackrefEmpty'
+  | 'DupGroupName'
+  | 'QuantifierOutOfOrder'
+  | 'CharRangeOutOfOrder'
+  | 'Identifier'
+  | 'UnicodePropertyName'
+  | 'UnicodePropertyValue';
   // A more precise error range
   range: TokenRange;
 };
@@ -59,7 +59,7 @@ export type RegexParseResult = K.Result<AST.Regex, RegexError>;
 
 export const lineTerms = '\n\r\u2028\u2029';
 export const syntaxChars = '^$\\.*+?()[]{}|/';
-export const controlEscapeMap: {[c: string]: string} = {
+export const controlEscapeMap: { [c: string]: string } = {
   f: '\f',
   n: '\n',
   r: '\r',
@@ -67,7 +67,7 @@ export const controlEscapeMap: {[c: string]: string} = {
   v: '\v'
 };
 
-export const charClassEscapeTypeMap: {[c: string]: AST.BaseCharClass} = {
+export const charClassEscapeTypeMap: { [c: string]: AST.BaseCharClass } = {
   s: 'Space',
   S: 'NonSpace',
   d: 'Digit',
@@ -76,7 +76,7 @@ export const charClassEscapeTypeMap: {[c: string]: AST.BaseCharClass} = {
   W: 'NonWord'
 };
 
-export const baseAssertionTypeMap: {[k: string]: AST.BaseAssertionType} = {
+export const baseAssertionTypeMap: { [k: string]: AST.BaseAssertionType } = {
   '\\b': 'WordBoundary',
   '\\B': 'NonWordBoundary',
   '^': 'Begin',
@@ -99,7 +99,7 @@ export const invGroupAssertionTypeMap = K.invertRecord(groupAssertionTypeMap);
 
 /** Parse "*,+,?" with optional non greedy mark "?" */
 export function parseBaseQuantifier(q?: string): AST.QuantifierNode {
-  let a = {type: 'Quantifier' as const, min: 0, max: Infinity, greedy: true, range: [0, 0] as [number, number]};
+  let a = { type: 'Quantifier' as const, min: 0, max: Infinity, greedy: true, range: [0, 0] as [number, number] };
   if (!q) return a;
   if (q[0] === '?') {
     a.max = 1;
@@ -146,7 +146,7 @@ export const IDRegex = new RegExp(
 );
 
 export function asNode<T extends AST.NodeBase>(type?: T['type']) {
-  return function(v: Omit<T, 'range' | 'type'> | {}, ctx: {range: TokenRange}): T {
+  return function (v: Omit<T, 'range' | 'type'> | {}, ctx: { range: TokenRange }): T {
     let a = v as any;
     if (!a.type && type) {
       a.type = type;
@@ -168,16 +168,16 @@ export abstract class BaseGrammar {
     re.lastIndex = ctx.position;
     let m = re.exec(ctx.input);
     if (m === null) {
-      return {error: true, consumed: 0};
+      return { error: true, consumed: 0 };
     }
     let c = m[0];
-    return {value: {type: 'Char', value: c, range: [ctx.position, ctx.position + c.length]}, consumed: c.length};
+    return { value: { type: 'Char', value: c, range: [ctx.position, ctx.position + c.length] }, consumed: c.length };
   });
 
   Dot = P.exact('.').map((_, ctx) => asNode<AST.DotNode>('Dot')({}, ctx));
 
   BaseCharClassEscape = P.re(/\\([dDsSwW])/).map((m, ctx) =>
-    asNode<AST.CharClassEscapeNode>('CharClassEscape')({charClass: charClassEscapeTypeMap[m[1]]}, ctx)
+    asNode<AST.CharClassEscapeNode>('CharClassEscape')({ charClass: charClassEscapeTypeMap[m[1]] }, ctx)
   );
 
   RawUnicodeCharClassEscape = P.re(/\\(p)\{([^{}=]*)(?:=([^{}]*))?\}/i);
@@ -190,9 +190,9 @@ export abstract class BaseGrammar {
 
     function makeError(t: RegexError['type'], range: TokenRange): K.Result<AST.UnicodeCharClass, RegexError> {
       if (loose) {
-        return K.OK({name, invert, value});
+        return K.OK({ name, invert, value });
       }
-      return {error: {type: t, range}};
+      return { error: { type: t, range } };
     }
 
     if (!name) return makeError('UnicodePropertyName', [ctx.range[0] + 2, ctx.range[1] - 1]);
@@ -207,31 +207,31 @@ export abstract class BaseGrammar {
       if (!unicodePropValues.has(value)) {
         return makeError('UnicodePropertyValue', [ctx.range[0] + 3 + m[2].length, ctx.range[1] - 1]);
       }
-      return K.OK({name, value, invert});
+      return K.OK({ name, value, invert });
     } else {
       if (UnicodeProperty.canonical.Binary_Property.has(name)) {
-        return K.OK({name, invert});
+        return K.OK({ name, invert });
       } else if (UnicodeProperty.canonical.General_Category.has(name)) {
-        return K.OK({name: 'General_Category', value: name, invert});
+        return K.OK({ name: 'General_Category', value: name, invert });
       } else {
         return makeError('UnicodePropertyValue', [ctx.range[0] + 2, ctx.range[1] - 1]);
       }
     }
-  }).map((cat, ctx) => asNode<AST.CharClassEscapeNode>('CharClassEscape')({charClass: cat}, ctx));
+  }).map((cat, ctx) => asNode<AST.CharClassEscapeNode>('CharClassEscape')({ charClass: cat }, ctx));
 
-  NullCharEscape = P.re(/\\0(?=\D|$)/).map((_, ctx) => asNode<AST.CharNode>('Char')({value: '\0'}, ctx));
+  NullCharEscape = P.re(/\\0(?=\D|$)/).map((_, ctx) => asNode<AST.CharNode>('Char')({ value: '\0' }, ctx));
 
   DecimalEscape = P.alts(
     P.re(/\\([1-9]\d*)/).mapE((m, ctx) => {
       let index = +m[1];
-      return {value: asNode<AST.BackrefNode>('Backref')({index}, ctx)};
+      return { value: asNode<AST.BackrefNode>('Backref')({ index }, ctx) };
     }),
     this.NullCharEscape,
     P.re(/\\(0\d+)/).mapE<AST.CharNode>((m, ctx) => {
       if (ctx.state.features.legacy.octalEscape) {
-        return {value: asNode<AST.CharNode>('Char')({value: String.fromCharCode(parseInt(m[1], 8))}, ctx)};
+        return { value: asNode<AST.CharNode>('Char')({ value: String.fromCharCode(parseInt(m[1], 8)) }, ctx) };
       }
-      return {error: {type: 'OctEscape', range: ctx.range}};
+      return { error: { type: 'OctEscape', range: ctx.range } };
     })
   );
 
@@ -255,7 +255,7 @@ export abstract class BaseGrammar {
     re.lastIndex = ctx.position;
     let m = re.exec(ctx.input);
     if (m === null) {
-      return {error: true, consumed: 0};
+      return { error: true, consumed: 0 };
     }
     let a: any = makeUnicodeEscape(...m.slice(1).filter(Boolean));
     if (a.error) {
@@ -295,19 +295,19 @@ export abstract class BaseGrammar {
       let unicodeMode = ctx.state.flags.unicode;
       let c = m[1];
       if (!ctx.state.features.legacy.identityEscape && unicodeMode && !syntaxChars.includes(c)) {
-        return K.Err({type: 'IdentityEscape', range: ctx.range});
+        return K.Err({ type: 'IdentityEscape', range: ctx.range });
       } else {
-        return {value: c};
+        return { value: c };
       }
     })
-  ).map((c, ctx) => asNode<AST.CharNode>('Char')({value: c}, ctx));
+  ).map((c, ctx) => asNode<AST.CharNode>('Char')({ value: c }, ctx));
 
   CharClassEscape = P.alts(this.BaseCharClassEscape, this.UnicodeCharClassEscape);
 
   CharClass() {
     return P.seqs(P.exact('^').opt(), this.CharClassRanges())
       .betweens('[', ']')
-      .map(([sign, ranges], ctx) => asNode<AST.CharClassNode>('CharClass')({invert: !!sign, body: ranges}, ctx));
+      .map(([sign, ranges], ctx) => asNode<AST.CharClassNode>('CharClass')({ invert: !!sign, body: ranges }, ctx));
   }
 
   CharClassRanges() {
@@ -360,14 +360,14 @@ export abstract class BaseGrammar {
 
           stack.length -= 2; // pop hyphen and prev
 
-          stack.push({type: 'CharRange', begin, end, range: [begin.range[0], end.range[1]]});
+          stack.push({ type: 'CharRange', begin, end, range: [begin.range[0], end.range[1]] });
         }
         return OK(stack);
       });
   }
 
   CharClassAtom() {
-    const specialChars: {[k: string]: string} = {'\\b': '\x08', '\\-': '-', '\\0': '\0', '\\B': 'B'};
+    const specialChars: { [k: string]: string } = { '\\b': '\x08', '\\-': '-', '\\0': '\0', '\\B': 'B' };
     const _classAtomRegex = /\\[bB0-]|[^\\\]]/y;
     const _unicodeClassAtomRegex = new RegExp(_classAtomRegex.source, 'uy');
     return P.alts(
@@ -376,16 +376,16 @@ export abstract class BaseGrammar {
         re.lastIndex = ctx.position;
         let m = re.exec(ctx.input);
         if (m === null) {
-          return {error: true, consumed: 0};
+          return { error: true, consumed: 0 };
         }
         let s = m[0];
         let consumed = s.length;
         let range = [ctx.position, ctx.position + consumed];
         if (s === '\\B' && !ctx.state.loose) {
-          return {error: {type: 'CharClassEscapeB', range} as RegexError, consumed};
+          return { error: { type: 'CharClassEscapeB', range } as RegexError, consumed };
         }
         s = specialChars[s] || s;
-        return {value: {type: 'Char', value: s, range: range} as AST.CharNode, consumed};
+        return { value: { type: 'Char', value: s, range: range } as AST.CharNode, consumed };
       }),
       P.alts(this.CharClassEscape, this.CharEscape)
     );
@@ -404,7 +404,7 @@ export abstract class BaseGrammar {
     }
 
     if (r.min > r.max && !ctx.state.loose) {
-      return {error: {type: 'QuantifierOutOfOrder', range: ctx.range}};
+      return { error: { type: 'QuantifierOutOfOrder', range: ctx.range } };
     }
 
     if (m[0].slice(-1) === '?') {
@@ -415,14 +415,14 @@ export abstract class BaseGrammar {
   });
 
   BaseAssertion = P.re(/\^|\$|\\b|\\B/).map((m, ctx) => {
-    return asNode<AST.BaseAssertionNode>('BaseAssertion')({kind: baseAssertionTypeMap[m[0]]}, ctx);
+    return asNode<AST.BaseAssertionNode>('BaseAssertion')({ kind: baseAssertionTypeMap[m[0]] }, ctx);
   });
 
   GroupAssertionBehavior = P.alts(...Object.keys(groupAssertionTypeMap).map(s => P.exact('(' + s))).map(
     (prefix, ctx) => {
       let [look, negative] = groupAssertionTypeMap[prefix.slice(1)];
       ctx.state.openPairs.push(ctx.range[0]);
-      return {assertion: <Omit<AST.GroupAssertionNode, 'body'>>{look, negative}};
+      return { assertion: <Omit<AST.GroupAssertionNode, 'body'>>{ look, negative } };
     }
   );
 
@@ -435,9 +435,9 @@ export abstract class BaseGrammar {
     // Not reentrant path, it's safe to modifiy state
     let pos = ctx.state.openPairs.pop();
     if (s === undefined) {
-      return {error: {type: 'ParenMismatch', range: [pos, pos]}} as Err<RegexError>;
+      return { error: { type: 'ParenMismatch', range: [pos, pos] } } as Err<RegexError>;
     }
-    return {value: s};
+    return { value: s };
   });
 
   abstract Term(): RegexParser<AST.ListNode['body'][number]>;
@@ -450,8 +450,8 @@ export abstract class BaseGrammar {
         return nodes[0];
       } else {
         return asNode<AST.ListNode>('List')(
-          {body: nodes},
-          {range: [nodes[0].range[0], nodes[nodes.length - 1].range[1]]}
+          { body: nodes },
+          { range: [nodes[0].range[0], nodes[nodes.length - 1].range[1]] }
         );
       }
     }
@@ -466,7 +466,7 @@ export abstract class BaseGrammar {
       let right = remain ? remain[1] : undefined;
       if (right) {
         let body = right.type === 'Disjunction' ? [left, ...right.body] : [left, right];
-        return asNode<AST.DisjunctionNode>('Disjunction')({body}, ctx);
+        return asNode<AST.DisjunctionNode>('Disjunction')({ body }, ctx);
       } else {
         return left;
       }
@@ -476,14 +476,14 @@ export abstract class BaseGrammar {
 
 export function check(re: AST.Node): K.Maybe<RegexError> {
   let totalGroups = AST.renumberGroups(re);
-  type GroupEnv = {names: string[]; indices: number[]};
-  type EnvBackup = {namesLength: number; indicesLength: number};
-  let groupEnv: GroupEnv = {names: [], indices: []};
+  type GroupEnv = { names: string[]; indices: number[] };
+  type EnvBackup = { namesLength: number; indicesLength: number };
+  let groupEnv: GroupEnv = { names: [], indices: [] };
 
   let regexError: K.Maybe<RegexError>;
 
   function backupEnv(): EnvBackup {
-    return {indicesLength: groupEnv.indices.length, namesLength: groupEnv.names.length};
+    return { indicesLength: groupEnv.indices.length, namesLength: groupEnv.names.length };
   }
 
   function restoreEnv(backup: EnvBackup) {
@@ -519,7 +519,7 @@ export function check(re: AST.Node): K.Maybe<RegexError> {
         }
 
         if (errType) {
-          regexError = {type: errType, range: n.range};
+          regexError = { type: errType, range: n.range };
           throw null;
         }
       },
@@ -543,7 +543,7 @@ export function check(re: AST.Node): K.Maybe<RegexError> {
       },
       Disjunction(n) {
         let backup = backupEnv();
-        let merged = {names: groupEnv.names.slice(), indices: groupEnv.indices.slice()};
+        let merged = { names: groupEnv.names.slice(), indices: groupEnv.indices.slice() };
         n.body.forEach(a => {
           _check(a);
           merged.names.push(...groupEnv.names.slice(backup.namesLength));
@@ -558,17 +558,17 @@ export function check(re: AST.Node): K.Maybe<RegexError> {
       Repeat(n) {
         _check(n.body);
       },
-      defaults(n) {}
+      defaults(n) { }
     });
   }
 }
 
-function checkIDEscape(ch: Charset): (c: string, ctx: {range: TokenRange}) => K.Result<string, RegexError> {
+function checkIDEscape(ch: Charset): (c: string, ctx: { range: TokenRange }) => K.Result<string, RegexError> {
   return (c, ctx) => {
     if (ch.includeChar(c)) {
-      return {value: c};
+      return { value: c };
     } else {
-      return {error: {type: 'UnicodeIDEscape', range: ctx.range}};
+      return { error: { type: 'UnicodeIDEscape', range: ctx.range } };
     }
   };
 }
@@ -581,7 +581,7 @@ function makeUnicodeEscape(...points: string[]): K.Result<string, Omit<RegexErro
     return K.OK(c);
   } catch (e) {
     // CodePoint out of range
-    return {error: {type: 'UnicodeEscape'}};
+    return { error: { type: 'UnicodeEscape' } };
   }
 }
 
@@ -592,7 +592,7 @@ export function toSource(node: AST.Node): string {
   return AST.bottomUp<string>(node, (n, parent) => {
     function escape(node: AST.CharNode) {
       let s = K.escapeRegex(node.value, parent && (parent.type === 'CharRange' || parent.type === 'CharClass'));
-      const escapes: {[k: string]: string} = {
+      const escapes: { [k: string]: string } = {
         '\f': '\\f',
         '\n': '\\n',
         '\r': '\\r',

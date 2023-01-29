@@ -1,6 +1,6 @@
-import * as UnicodeProperty from '../UnicodeProperty';
+import * as UnicodeProperty from '../_unicode-property';
 import * as fs from 'fs';
-import {Charset, CharRange, Maybe, flat, bsearch} from '../Kit';
+import { Charset, CharRange, Maybe, flat, bsearch } from '../_kit';
 
 export const DEFAULT_UNICODE_PKG = 'unicode-12.0.0';
 
@@ -10,9 +10,9 @@ if (require.main === module) {
 }
 
 export function buildUnicode(outputFile: string, unicodePkg = DEFAULT_UNICODE_PKG) {
-  let table: {[cls: string]: {[cat: string]: string}} = {};
+  let table: { [cls: string]: { [cat: string]: string } } = {};
 
-  let unicodeProps: {[k: string]: Set<string>} = {
+  let unicodeProps: { [k: string]: Set<string> } = {
     Binary_Property: UnicodeProperty.canonical.Binary_Property,
     General_Category: UnicodeProperty.canonical.General_Category,
     Script: UnicodeProperty.canonical.Script,
@@ -27,7 +27,7 @@ export function buildUnicode(outputFile: string, unicodePkg = DEFAULT_UNICODE_PK
     }
   }
 
-  let scriptCommon: {[k: string]: string} = {};
+  let scriptCommon: { [k: string]: string } = {};
 
   for (let k of unicodeProps.Script) {
     if (table.Script[k] === table.Script_Extensions[k]) {
@@ -107,11 +107,11 @@ Split charset list into non-overlapping charset.
 
 @deprecated  Zip compression is enough.
 */
-export function factorize(charsets: Charset[]): {factors: Charset[]; mapping: Map<Charset, Charset[]>} {
+export function factorize(charsets: Charset[]): { factors: Charset[]; mapping: Map<Charset, Charset[]> } {
   let queue = charsets.filter(c => !c.isEmpty()).sort(Charset.compare);
   let tempMap: Map<Charset, Charset[]> = new Map();
   let factors: Charset[] = [];
-  let result = {factors, mapping: tempMap};
+  let result = { factors, mapping: tempMap };
   if (queue.length < 2) {
     result.factors = queue;
     return result;
@@ -194,7 +194,7 @@ export function factorize(charsets: Charset[]): {factors: Charset[]; mapping: Ma
 
   function sink(c: Charset, startIndex: number): Maybe<Charset> {
     // insert charset back to queue and keep order
-    let {found, index} = bsearch(queue, c, Charset.compare, startIndex);
+    let { found, index } = bsearch(queue, c, Charset.compare, startIndex);
     if (found) {
       // Found charset equal to current insert
       return queue[index];

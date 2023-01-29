@@ -1,11 +1,11 @@
-import {h} from './HTML';
-import {EventEmitter, SyntheticEvent} from './EventEmitter';
+import { h } from './html';
+import { EventEmitter, SyntheticEvent } from './event-emitter';
 
 export const LEFT_ARROW_KEYCODE = 37;
 export const RIGHT_ARROW_KEYCODE = 39;
 export const ENTER_KEYCODE = 13;
 
-export type TextEditorEvents = 'change' | {boundary: SyntheticEvent & {readonly boundary: 'End' | 'Start'}};
+export type TextEditorEvents = 'change' | { boundary: SyntheticEvent & { readonly boundary: 'End' | 'Start' } };
 
 export interface TextEditorConfig {
   multiline: boolean;
@@ -18,7 +18,7 @@ export class TextEditor extends EventEmitter<TextEditorEvents> {
     multiline: false,
     checkChangeDelay: 500
   };
-  public readonly ele = h.div({contentEditable: 'true', spellcheck: false});
+  public readonly ele = h.div({ contentEditable: 'true', spellcheck: false });
   public readonly config: TextEditorConfig;
   constructor(config?: Partial<TextEditorConfig>) {
     super({
@@ -47,7 +47,7 @@ export class TextEditor extends EventEmitter<TextEditorEvents> {
         if (String(getSelection())) return;
         let b = keyCode === LEFT_ARROW_KEYCODE ? ('Start' as const) : ('End' as const);
         if (this.isCaretAtBoundary(b)) {
-          this.emit('boundary', {boundary: b});
+          this.emit('boundary', { boundary: b });
           event.preventDefault();
         }
       }
@@ -66,7 +66,7 @@ export class TextEditor extends EventEmitter<TextEditorEvents> {
     this.ele.focus();
     let sel = getSelection()!;
     if (position === 'End') {
-      let {lastChild} = this.ele;
+      let { lastChild } = this.ele;
       if (lastChild) {
         let range = sel.getRangeAt(0);
         range.setEndAfter(lastChild);

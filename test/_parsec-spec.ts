@@ -1,11 +1,11 @@
-import * as Parsec from '../src/Parsec';
-import * as K from '../src/Kit';
+import * as Parsec from '../src/_parsec';
+import * as K from '../src/_kit';
 import * as C from 'fast-check';
-import {testProp, sampleInCharset} from './utils';
-import {assert} from 'chai';
-import {Parser} from '../src/Parsec';
+import { testProp, sampleInCharset } from './utils';
+import { assert } from 'chai';
+import { Parser } from '../src/_parsec';
 
-type TestState = {counter: number; whole: string};
+type TestState = { counter: number; whole: string };
 const P = Parsec.refine<string, TestState, null>();
 
 function unicodes() {
@@ -15,45 +15,45 @@ function unicodes() {
 type ParseTestCase<A> = {
   parser: Parsec.Parser<string, A, TestState, null>;
   input: string;
-  expect: {consumed: number; value: A};
+  expect: { consumed: number; value: A };
 };
 
 const PrimeParser = {
   Exacts(s: string) {
-    return {parser: P.exact(s), input: s, expect: {consumed: s.length, value: s}};
+    return { parser: P.exact(s), input: s, expect: { consumed: s.length, value: s } };
   },
   OneOf(s: string) {
     let c = Array.from(s).pop()!;
-    return {parser: P.oneOf(s), input: c, expect: {consumed: c.length, value: c}};
+    return { parser: P.oneOf(s), input: c, expect: { consumed: c.length, value: c } };
   },
   NoneOf(s: string) {
     let charset = K.Charset.fromChars(s).inverted();
     let c = sampleInCharset(charset, 1)[0];
-    return {parser: P.noneOf(s), input: c, expect: {consumed: c.length, value: c}};
+    return { parser: P.noneOf(s), input: c, expect: { consumed: c.length, value: c } };
   },
   Charset(s: string) {
     let charset = K.Charset.fromChars(s);
     let c = sampleInCharset(charset, 1)[0];
-    return {parser: P.charset(charset), input: c, expect: {consumed: c.length, value: c}};
+    return { parser: P.charset(charset), input: c, expect: { consumed: c.length, value: c } };
   },
   RepeatOneOf(s: string): ParseTestCase<string[]> {
     return {
       parser: P.oneOf(s).repeat(),
       input: s,
-      expect: {consumed: s.length, value: Array.from(s)}
+      expect: { consumed: s.length, value: Array.from(s) }
     };
   },
   RepeatNoneOf(s: string): ParseTestCase<string[]> {
     let charset = K.Charset.fromChars(s).inverted();
     let input = sampleInCharset(charset).join('');
     let chars = Array.from(input);
-    return {parser: P.noneOf(s).repeat(), input: input, expect: {consumed: input.length, value: chars}};
+    return { parser: P.noneOf(s).repeat(), input: input, expect: { consumed: input.length, value: chars } };
   },
   CountsOneOf(s: string) {
     return {
       parser: P.oneOf(s).counts(Array.from(s).length),
       input: s,
-      expect: {consumed: s.length, value: s}
+      expect: { consumed: s.length, value: s }
     };
   },
   CountsNoneOf(s: string) {
@@ -62,7 +62,7 @@ const PrimeParser = {
     return {
       parser: P.noneOf(s).counts(Array.from(input).length),
       input: input,
-      expect: {consumed: input.length, value: input}
+      expect: { consumed: input.length, value: input }
     };
   },
   RegexRepeat(s: string) {
@@ -70,14 +70,14 @@ const PrimeParser = {
       .repeats()
       .slice();
     let input = new Array(10).join(s);
-    return {parser: re, input: input, expect: {consumed: input.length, value: input}};
+    return { parser: re, input: input, expect: { consumed: input.length, value: input } };
   },
   GetState(s: string): ParseTestCase<string> {
     let p = P.getState().thenF((st, ctx) => {
       return P.exact(st.whole);
     });
     let input = s;
-    return {parser: p, input: input, expect: {consumed: input.length, value: input}};
+    return { parser: p, input: input, expect: { consumed: input.length, value: input } };
   },
 
   ThenF(s: string) {
@@ -87,7 +87,7 @@ const PrimeParser = {
       return P.exact(v1.toUpperCase()).map(v2 => v2 + v1);
     });
     let input = s1 + s2;
-    return {parser: p, input: input, expect: {consumed: input.length, value: s2 + s1}};
+    return { parser: p, input: input, expect: { consumed: input.length, value: s2 + s1 } };
   }
 };
 
@@ -97,19 +97,19 @@ const ComboParser = {
     let consumed = K.sum(seqs.map(p => p.expect.consumed));
     let value = seqs.map(p => p.expect.value);
     let parsers = seqs.map(p => p.parser);
-    return {parser: P.seqs(...parsers), input, expect: {consumed, value}};
+    return { parser: P.seqs(...parsers), input, expect: { consumed, value } };
   },
   Alts<A>(alts: ParseTestCase<A>[], i: number): ParseTestCase<A> {
     let choosed = alts[i];
     let parsers = alts.map(p => p.parser);
-    return {parser: P.alts(...parsers), input: choosed.input, expect: choosed.expect};
+    return { parser: P.alts(...parsers), input: choosed.input, expect: choosed.expect };
   },
   ThenR<A>(seqs: ParseTestCase<A>[]): ParseTestCase<A> {
     let input = seqs.map(p => p.input).join('');
     let consumed = K.sum(seqs.map(p => p.expect.consumed));
     let value = seqs[seqs.length - 1].expect.value;
     let parser = seqs.map(p => p.parser).reduce((p1, p2) => p1.thenR(p2));
-    return {parser: parser, input, expect: {consumed, value}};
+    return { parser: parser, input, expect: { consumed, value } };
   },
   Slice(p: ParseTestCase<any>): ParseTestCase<string> {
     p.expect.value = p.input;
@@ -120,10 +120,10 @@ const ComboParser = {
 
 const UtilGen = {
   Empty() {
-    return {parser: P.empty, input: '', expect: {consumed: 0, value: undefined}};
+    return { parser: P.empty, input: '', expect: { consumed: 0, value: undefined } };
   },
   EOF() {
-    return {parser: P.eof, input: '', expect: {consumed: 0, value: undefined}};
+    return { parser: P.eof, input: '', expect: { consumed: 0, value: undefined } };
   }
 };
 
@@ -171,7 +171,7 @@ const Gen = {
   },
 
   Slice() {
-    let _Gen = Gen as {[k: string]: () => C.Arbitrary<ParseTestCase<any>>};
+    let _Gen = Gen as { [k: string]: () => C.Arbitrary<ParseTestCase<any>> };
     let gens = Object.keys(_Gen)
       .filter(k => k !== 'Slice')
       .map(k => _Gen[k]);
@@ -192,17 +192,17 @@ const Gen = {
       seqs.forEach((cur, i) => {
         value[names[i]] = cur.expect.value;
       });
-      let parsers = seqs.map((p, i) => ({[names[i]]: p.parser}));
+      let parsers = seqs.map((p, i) => ({ [names[i]]: p.parser }));
 
-      return {parser: P.bind(...parsers), input, expect: {consumed, value}};
+      return { parser: P.bind(...parsers), input, expect: { consumed, value } };
     });
   }
 };
 
 function testParser(title: string, gen: C.Arbitrary<ParseTestCase<any>>) {
   testProp(title, gen, g => {
-    let {parser, input, expect} = g;
-    let state = {counter: 1, whole: input};
+    let { parser, input, expect } = g;
+    let state = { counter: 1, whole: input };
     let result = parser.parse(input, state);
     assert(K.isResultOK(result));
     assert(result.consumed == expect.consumed);
@@ -259,7 +259,7 @@ function evalExpr(e: [number, string, number]): number {
   throw new Error('Unexpected operator:' + op);
 }
 
-describe('Parsec', function() {
+describe('Parsec', function () {
   describe('Prime', () => {
     for (let k in PrimeParser) {
       let gen = K.IndexSig(PrimeParser)[k];
@@ -280,7 +280,7 @@ describe('Parsec', function() {
 
     if (K.isResultOK(result)) assert.equal(result.value, eval(expr));
     else {
-      console.dir(result.error, {depth: 10});
+      console.dir(result.error, { depth: 10 });
       assert.fail('Arith');
     }
   });
