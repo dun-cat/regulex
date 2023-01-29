@@ -1,6 +1,6 @@
-import * as UnicodeProperty from '../_unicode-property';
+import * as UnicodeProperty from '../unicode-property';
 import * as fs from 'fs';
-import { Charset, CharRange, Maybe, flat, bsearch } from '../_kit';
+import { Charset, CharRange, Maybe, flat, bsearch } from '../kit';
 
 export const DEFAULT_UNICODE_PKG = 'unicode-12.0.0';
 

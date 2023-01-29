@@ -1,15 +1,15 @@
 import * as FC from 'fast-check';
-import * as K from '../../src/_kit';
+import * as K from '../../src/kit';
 import { genInCharset, property, prettyPrint } from '../utils';
 import { produce } from 'immer';
 import * as _ from 'lodash';
-import * as UnicodeProperty from '../../src/_unicode-property';
+import * as UnicodeProperty from '../../src/unicode-property';
 import { Omit } from 'utility-types';
-import Unicode from '../../src/_unicode';
+import Unicode from '../../src/unicode';
 
-import * as AST from '../../src/_ast';
-import * as JSRE from '../../src/grammar/_jsre';
-import * as GBase from '../../src/grammar/_base';
+import * as AST from '../../src/ast';
+import * as JSRE from '../../src/grammar/jsre';
+import * as GBase from '../../src/grammar/base';
 
 import * as path from 'path';
 import * as fs from 'fs';

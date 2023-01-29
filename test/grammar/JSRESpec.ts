@@ -1,9 +1,9 @@
-import * as K from '../../src/_kit';
+import * as K from '../../src/kit';
 import * as FC from 'fast-check';
-import { IndexSig } from '../../src/_kit';
+import { IndexSig } from '../../src/kit';
 import { produce } from 'immer';
-import * as AST from '../../src/_ast';
-import * as JSRE from '../../src/grammar/_jsre';
+import * as AST from '../../src/ast';
+import * as JSRE from '../../src/grammar/jsre';
 import { BaseGen, runGrammarTest, GenState, TestCase, UtilGen, makeGenState, GenFn } from './BaseGen';
 
 import { assert } from 'chai';

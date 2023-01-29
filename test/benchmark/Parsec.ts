@@ -1,5 +1,5 @@
-import * as PM from '../../src/_parsec';
-import * as K from '../../src/_kit';
+import * as PM from '../../src/parsec';
+import * as K from '../../src/kit';
 import { Parser } from 'acorn';
 import { Suite } from 'benchmark';
 

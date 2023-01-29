@@ -1,6 +1,6 @@
-import { Charset, Char, randInt } from '../../src/_kit';
-import * as K from '../../src/_kit';
-import Unicode from '../../src/_unicode';
+import { Charset, Char, randInt } from '../../src/kit';
+import * as K from '../../src/kit';
+import Unicode from '../../src/unicode';
 import { Suite } from 'benchmark';
 import assert = require('assert');
 

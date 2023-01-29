@@ -1,11 +1,11 @@
-import { h } from './_html';
+import { h } from './html';
 import { EventEmitter, SyntheticEvent, EventsMap } from './event-emitter';
 import { TextEditor, LEFT_ARROW_KEYCODE } from './text-editor';
-import * as css from './style/_regex-editor.local.css';
-import * as AST from '../_ast';
-import * as K from '../_kit';
-import { RegexError } from '../grammar/_base';
-import * as JSRE from '../grammar/_jsre';
+import * as css from './style/regex-editor.local.css';
+import * as AST from '../ast';
+import * as K from '../kit';
+import { RegexError } from '../grammar/base';
+import * as JSRE from '../grammar/jsre';
 
 export type RegexValidateError = RegexError | { type: 'Flags'; invalid: string };
 

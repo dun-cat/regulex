@@ -1,5 +1,5 @@
-import { h, StyleValue } from './_html';
-import * as K from '../_kit';
+import { h, StyleValue } from './html';
+import * as K from '../kit';
 import { RegexEditor } from './regex-editor';
 import './style/main.css'; // Webpack sucks!
 

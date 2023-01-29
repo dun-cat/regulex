@@ -1,9 +1,9 @@
-import * as Parsec from '../src/_parsec';
-import * as K from '../src/_kit';
+import * as Parsec from '../src/parsec';
+import * as K from '../src/kit';
 import * as C from 'fast-check';
 import { testProp, sampleInCharset } from './utils';
 import { assert } from 'chai';
-import { Parser } from '../src/_parsec';
+import { Parser } from '../src/parsec';
 
 type TestState = { counter: number; whole: string };
 const P = Parsec.refine<string, TestState, null>();

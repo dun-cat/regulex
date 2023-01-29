@@ -1,2 +1,2 @@
-import * as JSRE from './_jsre';
+import * as JSRE from './jsre';
 export { JSRE };

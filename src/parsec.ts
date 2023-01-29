@@ -1,5 +1,5 @@
-import * as K from './_kit';
-import { Err, Result, isResultOK, InterU } from './_kit';
+import * as K from './kit';
+import { Err, Result, isResultOK, InterU } from './kit';
 import { $Values } from 'utility-types';
 
 /**

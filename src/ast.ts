@@ -1,6 +1,6 @@
-import { TokenRange } from './_parsec';
-import { SubstIn } from './_kit';
-import * as K from './_kit';
+import { TokenRange } from './parsec';
+import { SubstIn } from './kit';
+import * as K from './kit';
 import * as UT from 'utility-types';
 
 export interface NodeBase {
