@@ -1,4 +1,4 @@
-import { h } from './html';
+import { h } from './_html';
 import { EventEmitter, SyntheticEvent } from './event-emitter';
 
 export const LEFT_ARROW_KEYCODE = 37;

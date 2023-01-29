@@ -4,7 +4,7 @@ import { testProp, sampleInCharRange } from './utils';
 import { assert } from 'chai';
 import Unicode from '../src/_unicode';
 import * as UnicodeProperty from '../src/_unicode-property';
-import { factorize, DEFAULT_UNICODE_PKG } from '../src/tools/buildUnicode';
+import { factorize, DEFAULT_UNICODE_PKG } from '../src/tools/build-unicode';
 
 const charPairGen = () => C.tuple(C.fullUnicode(), C.fullUnicode());
 const charRangeGen = () =>

@@ -3,7 +3,7 @@ import * as K from '../_kit';
 import { OK, Err, Charset } from '../_kit';
 import Unicode from '../_unicode';
 import * as UnicodeProperty from '../_unicode-property';
-import * as AST from '../ast';
+import * as AST from '../_ast';
 import { Omit } from 'utility-types';
 import * as Parsec from '../_parsec';
 

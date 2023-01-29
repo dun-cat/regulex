@@ -4,7 +4,7 @@ import { IndexSig } from '../src/_kit';
 import { testProp, genInCharset, property, prettyPrint } from './utils';
 import { produce } from 'immer';
 import * as AST from '../src/_ast';
-import * as JSRE from '../src/grammar/jsre';
+import * as JSRE from '../src/grammar/_jsre';
 import * as _ from 'lodash';
 
 import { assert, expect } from 'chai';

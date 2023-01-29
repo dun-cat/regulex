@@ -1,6 +1,6 @@
 import { refine, Grammar, TokenRange } from '../_parsec';
 import * as K from '../_kit';
-import * as AST from '../ast';
+import * as AST from '../_ast';
 import {
   RegexParseState,
   RegexError,

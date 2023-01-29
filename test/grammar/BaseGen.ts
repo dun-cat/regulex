@@ -7,8 +7,8 @@ import * as UnicodeProperty from '../../src/_unicode-property';
 import { Omit } from 'utility-types';
 import Unicode from '../../src/_unicode';
 
-import * as AST from '../../src/ast';
-import * as JSRE from '../../src/grammar/jsre';
+import * as AST from '../../src/_ast';
+import * as JSRE from '../../src/grammar/_jsre';
 import * as GBase from '../../src/grammar/_base';
 
 import * as path from 'path';

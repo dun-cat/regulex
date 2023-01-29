@@ -1,6 +1,6 @@
-import { h, StyleValue } from './HTML';
-import * as K from '../Kit';
-import { RegexEditor } from './RegexEditor';
+import { h, StyleValue } from './_html';
+import * as K from '../_kit';
+import { RegexEditor } from './regex-editor';
 import './style/main.css'; // Webpack sucks!
 
 document.addEventListener('DOMContentLoaded', main);

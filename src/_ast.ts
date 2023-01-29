@@ -1,4 +1,4 @@
-import { TokenRange } from './Parsec';
+import { TokenRange } from './_parsec';
 import { SubstIn } from './_kit';
 import * as K from './_kit';
 import * as UT from 'utility-types';

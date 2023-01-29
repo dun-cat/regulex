@@ -1,21 +1,21 @@
-import * as PM from '../../src/Parsec';
-import * as K from '../../src/Kit';
-import {Parser} from 'acorn';
-import {Suite} from 'benchmark';
+import * as PM from '../../src/_parsec';
+import * as K from '../../src/_kit';
+import { Parser } from 'acorn';
+import { Suite } from 'benchmark';
 
 const P = PM.refine<string, null, null>();
 
 const suite = new Suite();
 
-type Node = {type: string; range: PM.TokenRange; body: string | number | Node | {left: Node; right: Node}};
+type Node = { type: string; range: PM.TokenRange; body: string | number | Node | { left: Node; right: Node } };
 
-function toNode(type: string): (v: Node['body'], info: {range: PM.TokenRange}) => Node {
-  return (v, info): Node => ({type: type, range: info.range, body: v});
+function toNode(type: string): (v: Node['body'], info: { range: PM.TokenRange }) => Node {
+  return (v, info): Node => ({ type: type, range: info.range, body: v });
 }
 
 let toBinExprNode = toNode('BinaryExpr');
-function toBinExpr([a, op, b]: [Node, Node, Node], info: {range: PM.TokenRange}): Node {
-  return toBinExprNode({left: a, right: b}, info);
+function toBinExpr([a, op, b]: [Node, Node, Node], info: { range: PM.TokenRange }): Node {
+  return toBinExprNode({ left: a, right: b }, info);
 }
 
 class BaseDef {
@@ -72,10 +72,10 @@ suite
   .add('Arcorn', () => {
     Parser.parse(expr);
   })
-  .on('cycle', function(event: any) {
+  .on('cycle', function (event: any) {
     console.log(String(event.target));
   })
-  .on('complete', function(this: any) {
+  .on('complete', function (this: any) {
     console.log('Fastest is ' + this.filter('fastest').map('name'));
   })
   .run();

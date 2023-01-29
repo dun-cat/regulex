@@ -1,7 +1,7 @@
-import {Charset, Char, randInt} from '../../src/Kit';
-import * as K from '../../src/Kit';
-import Unicode from '../../src/Unicode';
-import {Suite} from 'benchmark';
+import { Charset, Char, randInt } from '../../src/_kit';
+import * as K from '../../src/_kit';
+import Unicode from '../../src/_unicode';
+import { Suite } from 'benchmark';
 import assert = require('assert');
 
 const suite = new Suite();
@@ -31,10 +31,10 @@ suite
   .add('Regex', () => {
     assert(regex.test(str));
   })
-  .on('cycle', function(event: any) {
+  .on('cycle', function (event: any) {
     console.log(String(event.target));
   })
-  .on('complete', function(this: any) {
+  .on('complete', function (this: any) {
     console.log('Fastest is ' + this.filter('fastest').map('name'));
   })
   .run();
