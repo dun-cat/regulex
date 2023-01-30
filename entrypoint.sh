@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd ./build/
+cd ./dist/
 
 set -eu
 

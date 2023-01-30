@@ -31,6 +31,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
-          source: "./dist"
+          source: "./"
           target: "/docker_volumes/nginx/sites/tools/regulex"
           debug: true
