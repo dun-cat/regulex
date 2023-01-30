@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [10]
+        node: [16]
     steps:
       # 签出代码
       - name: Check out repository code
