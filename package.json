@@ -12,11 +12,18 @@
     "RegExp",
     "Regulex"
   ],
-  "dependencies":{
-    "amdefine":"~1.0.0"
+  "scripts": {
+    "build": "r.js -o build-config.js && npm run rsync",
+    "rsync": "rsync -avu --include={'*.js'} \"./index.html\" \"./dist\""
+  },
+  "dependencies": {
+    "amdefine": "~1.0.0"
   },
   "author": {
     "name": "Jex"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "requirejs": "^2.3.6"
+  }
 }

@@ -1,0 +1,36 @@
+name: Deploy self host
+
+on:
+  push:
+    branches: [legacy]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [10]
+    steps:
+      # 签出代码
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      # 安装依赖
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Working Directory
+        run: pwd && ls
+      # 构建
+      - name: Build Project
+        run: npm run build
+      # scp 上传
+      - name: SCP-Deploy
+        uses: appleboy/scp-action@master
+        with:
+          entrypoint: ./entrypoint.sh
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          source: "./dist"
+          target: "/docker_volumes/nginx/sites/tools/regulex"
+          debug: true
