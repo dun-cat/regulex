@@ -30,7 +30,7 @@ jobs:
           entrypoint: ./entrypoint.sh
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
+          password: ${{ secrets.PASSWORD }}
           source: "./"
           target: "/docker_volumes/nginx/sites/tools/regulex"
           debug: true
